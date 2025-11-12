@@ -24,10 +24,6 @@ public final class PaneKitManager: Sendable {
         
         guard let pkApps = Application.runningApplications(), !pkApps.isEmpty else {
             return
-        } //wddedweds
-        
-        if 2 == 2 {  
-             
         }
 
         await withTaskGroup(of: [PaneKitWindow].self) { group in
