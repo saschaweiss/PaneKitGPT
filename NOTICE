@@ -1,0 +1,18 @@
+PaneKit
+Copyright (c) 2025 Alexander Streb (aka saschaweiss)
+
+PaneKit is an open-source macOS window management framework developed and maintained
+by Alexander Streb. It is licensed under the Apache License, Version 2.0.
+
+Attribution Notice:
+If PaneKit or substantial portions of its code are used in a commercial or
+closed-source product, visible credit must be given to the original author:
+
+    "Powered by PaneKit — developed by Alexander Streb (aka Sascha Weiss)"
+
+This notice should appear in at least one of the following:
+ • the product’s “About” or “Credits” section,
+ • the product documentation,
+ • or within the license acknowledgements of the software.
+
+No warranty is provided. Use at your own risk.
