@@ -29,24 +29,16 @@ actor PaneKitCache {
         cache.values.first(where: { $0.isFocused })
     }
     
-    // MARK: - Entfernen
-    
     func remove(_ stableID: String) {
-        queue.async(flags: .barrier) { [self] in
-            cache.removeValue(forKey: stableID)
-        }
+        cache.removeValue(forKey: stableID)
     }
     
-    func removeAll(where predicate: @escaping (PaneKitWindow) -> Bool) {
-        queue.async(flags: .barrier) { [self] in
-            cache = cache.filter { !predicate($0.value) }
-        }
+    func removeAll(where predicate: (PaneKitWindow) -> Bool) {
+        cache = cache.filter { !predicate($0.value) }
     }
     
     func clear() {
-        queue.async(flags: .barrier) { [self] in
-            cache.removeAll()
-        }
+        cache.removeAll()
     }
     
     // MARK: - Status
