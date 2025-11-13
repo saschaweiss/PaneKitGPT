@@ -41,38 +41,25 @@ actor PaneKitCache {
         cache.removeAll()
     }
     
-    // MARK: - Status
-    
     func contains(_ stableID: String) -> Bool {
-        queue.sync {
-            cache.keys.contains(stableID)
-        }
+        cache.keys.contains(stableID)
     }
     
     func count() -> Int {
-        queue.sync {
-            cache.count
-        }
+        cache.count
     }
     
-    // MARK: - Debug
-    
     func debugDump() -> String {
-        var result = ""
-        queue.sync {
-            guard !cache.isEmpty else {
-                result = "🪶 PaneKitCache leer"
-                return
-            }
-            var output = "📦 PaneKitCache Inhalt (\(cache.count) Elemente):\n"
-            for window in cache.values.sorted(by: { $0.stableID < $1.stableID }) {
-                let type = window.windowType.rawValue
-                let focusMark = window.isFocused ? "⭐️" : " "
-                let parent = window.parentID ?? "—"
-                output += "• [\(type)] \(focusMark) ID: \(window.stableID) | Parent: \(parent) | App: \(window.bundleID)\n"
-            }
-            result = output
+        guard !cache.isEmpty else {
+            return "🪶 PaneKitCache leer"
         }
-        return result
+        var output = "📦 PaneKitCache Inhalt (\(cache.count) Elemente):\n"
+        for window in cache.values.sorted(by: { $0.stableID < $1.stableID }) {
+            let type = window.windowType.rawValue
+            let focusMark = window.isFocused ? "⭐️" : " "
+            let parent = window.parentID ?? "—"
+            output += "• [\(type)] \(focusMark) ID: \(window.stableID) | Parent: \(parent) | App: \(window.bundleID)\n"
+        }
+        return output
     }
 }
