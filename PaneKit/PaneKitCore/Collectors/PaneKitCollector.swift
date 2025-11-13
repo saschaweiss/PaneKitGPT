@@ -37,7 +37,6 @@ open class PaneKitCollector: @unchecked Sendable {
             }
 
             await ensureStableID(for: win)
-            await win.checkTypeTransition()
 
             win.screen = NSScreen.screens.first(where: { $0.frame.intersects(win.frame) })
 
@@ -134,6 +133,7 @@ open class PaneKitCollector: @unchecked Sendable {
     }
     
     public static func delta(for bundleID: String) async -> (added: [PaneKitWindow], removed: [PaneKitWindow]) {
+        /*
         let cached = await PaneKitCache.shared.windows(forBundleID: bundleID)
         let cachedIDs = Set(cached.map(\.stableID))
         
@@ -158,6 +158,7 @@ open class PaneKitCollector: @unchecked Sendable {
         }
         
         return (added, removed)
+         */
     }
 }
 
