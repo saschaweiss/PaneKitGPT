@@ -1,10 +1,6 @@
 import Foundation
 import CoreGraphics
 
-/// Thread-sicherer In-Memory-Cache für PaneKitWindow-Objekte.
-/// Jeder Eintrag ist über seine stableID eindeutig identifizierbar.
-/// Nur PaneKitManager (und später EventManager) dürfen schreiben.
-/// Alle Module dürfen lesen.
 final class PaneKitCache {
     
     // MARK: - Singleton
@@ -16,10 +12,6 @@ final class PaneKitCache {
     
     private init() {}
     
-    // MARK: - Schreiben
-    
-    /// Speichert oder aktualisiert ein einzelnes Fenster im Cache.
-    /// Falls die stableID bereits existiert, wird der Eintrag ersetzt.
     func store(_ window: PaneKitWindow) {
         queue.async(flags: .barrier) {
             self.cache[window.stableID] = window
