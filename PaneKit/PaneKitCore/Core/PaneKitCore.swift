@@ -63,6 +63,7 @@ public final class PaneKitWindow: Identifiable, Hashable, @unchecked Sendable {
     public var windowType: PaneKitWindowType = .window
     public var tabs: [PaneKitWindow]? = nil
     public var tabIndex: Int?
+    var parentID: String?
     
     public private(set) var lastUpdate: Date = .distantPast
     public var lastKnownFrame: CGRect = .zero
