@@ -3,8 +3,7 @@ import CoreGraphics
 
 actor PaneKitCache {
     static let shared = PaneKitCache()
-    private var cache: [String: PaneKitWindow] = [:] // stableID -> Window
-    private let queue = DispatchQueue(label: "com.panekit.cache", attributes: .concurrent)
+    private var cache: [String: PaneKitWindow] = [:]
     
     private init() {}
     
