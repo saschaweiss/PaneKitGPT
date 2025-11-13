@@ -17,9 +17,7 @@ public final class PaneKitCore {
         
         print("🟦 PaneKitCore: Initializing system...")
 
-        let windows = await PaneKitManager.shared.
-
-        print("✅ PaneKitCore: Ready with \(windows.count) windows")
+        let windows = await PaneKitManager.start()
     }
 }
 
