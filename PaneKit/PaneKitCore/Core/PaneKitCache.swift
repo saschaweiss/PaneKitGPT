@@ -1,6 +1,7 @@
 import Foundation
 import CoreGraphics
 
+@unchecked Sendable
 final class PaneKitCache {
     static let shared = PaneKitCache()
     private var cache: [String: PaneKitWindow] = [:] // stableID -> Window
