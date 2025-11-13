@@ -17,7 +17,7 @@ public final class PaneKitCore {
         
         print("🟦 PaneKitCore: Initializing system...")
 
-        let windows = await PaneKitManager.shared.collectAllWindows()
+        let windows = await PaneKitManager.shared.
 
         print("✅ PaneKitCore: Ready with \(windows.count) windows")
     }
@@ -133,7 +133,7 @@ public final class PaneKitWindow: Identifiable, Hashable, @unchecked Sendable {
         self.zIndex         = pkWindow.zIndex
         self.screen         = pkWindow.screen() ?? NSScreen.main
         
-        self.parentID         = pkWindow.parentTabHost
+        self.parentID       = pkWindow.parentTabHost
         
         self.lastUpdate = Date()
         
