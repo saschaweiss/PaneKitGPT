@@ -16,6 +16,8 @@ public final class PaneKitCore {
         isInitialized = true
         
         print("🟦 PaneKitCore: Initializing system...")
+
+        let windows = await PaneKitManager.start(configuration: PaneKitConfiguration)
     }
 }
 
