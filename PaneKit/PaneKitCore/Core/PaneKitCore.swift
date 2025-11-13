@@ -17,7 +17,7 @@ public final class PaneKitCore {
         
         print("🟦 PaneKitCore: Initializing system...")
 
-        let windows = await PaneKitManager.start(configuration: PaneKitConfiguration)
+        let windows = await PaneKitManager.start(PaneKitConfiguration.shared)
     }
 }
 
