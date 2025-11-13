@@ -7,19 +7,13 @@ actor PaneKitCache {
     
     private init() {}
     
-    // MARK: - Schreiben
-    
     func store(_ window: PaneKitWindow) {
-        queue.async(flags: .barrier) { [self] in
-            cache[window.stableID] = window
-        }
+        cache[window.stableID] = window
     }
     
     func store(_ windows: [PaneKitWindow]) {
-        queue.async(flags: .barrier) { [self] in
-            for window in windows {
-                cache[window.stableID] = window
-            }
+        for window in windows {
+            cache[window.stableID] = window
         }
     }
     
