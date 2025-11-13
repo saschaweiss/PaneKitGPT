@@ -63,7 +63,7 @@ public final class PaneKitWindow: Identifiable, Hashable, @unchecked Sendable {
     public var windowType: PaneKitWindowType = .window
     public var tabs: [PaneKitWindow]? = nil
     public var tabIndex: Int?
-    var parentID: String?
+    public var parentID: String?
     
     public private(set) var lastUpdate: Date = .distantPast
     public var lastKnownFrame: CGRect = .zero
@@ -132,6 +132,8 @@ public final class PaneKitWindow: Identifiable, Hashable, @unchecked Sendable {
         self.isFocused      = pkWindow.isFocused
         self.zIndex         = pkWindow.zIndex
         self.screen         = pkWindow.screen() ?? NSScreen.main
+        
+        self.parentID         = pkWindow.parentTabHost
         
         self.lastUpdate = Date()
         
