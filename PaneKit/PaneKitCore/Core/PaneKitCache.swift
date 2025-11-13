@@ -16,6 +16,8 @@ final class PaneKitCache {
     
     private init() {}
     
+    // MARK: - Schreiben
+    
     func store(_ window: PaneKitWindow) {
         queue.async(flags: .barrier) { [self] in
             cache[window.stableID] = window
@@ -30,6 +32,8 @@ final class PaneKitCache {
         }
     }
     
+    // MARK: - Lesen
+    
     func get(_ stableID: String) -> PaneKitWindow? {
         queue.sync {
             cache[stableID]
@@ -42,29 +46,35 @@ final class PaneKitCache {
         }
     }
     
+    /// Gibt das aktuell fokussierte Fenster zurück, falls bekannt.
+    /// Wichtig: `isFocused` darf **nicht** @MainActor isoliert sein.
     func focusedWindow() -> PaneKitWindow? {
         queue.sync {
             cache.values.first(where: { $0.isFocused })
         }
     }
     
+    // MARK: - Entfernen
+    
     func remove(_ stableID: String) {
-        queue.async(flags: .barrier) {
-            self.cache.removeValue(forKey: stableID)
+        queue.async(flags: .barrier) { [self] in
+            cache.removeValue(forKey: stableID)
         }
     }
     
-    func removeAll(where predicate: (PaneKitWindow) -> Bool) {
-        queue.async(flags: .barrier) {
-            self.cache = self.cache.filter { !predicate($0.value) }
+    func removeAll(where predicate: @escaping (PaneKitWindow) -> Bool) {
+        queue.async(flags: .barrier) { [self] in
+            cache = cache.filter { !predicate($0.value) }
         }
     }
     
     func clear() {
-        queue.async(flags: .barrier) {
-            self.cache.removeAll()
+        queue.async(flags: .barrier) { [self] in
+            cache.removeAll()
         }
     }
+    
+    // MARK: - Status
     
     func contains(_ stableID: String) -> Bool {
         queue.sync {
@@ -78,10 +88,14 @@ final class PaneKitCache {
         }
     }
     
+    // MARK: - Debug
+    
     func debugDump() -> String {
+        var result = ""
         queue.sync {
-            if cache.isEmpty {
-                return "🪶 PaneKitCache leer"
+            guard !cache.isEmpty else {
+                result = "🪶 PaneKitCache leer"
+                return
             }
             var output = "📦 PaneKitCache Inhalt (\(cache.count) Elemente):\n"
             for window in cache.values.sorted(by: { $0.stableID < $1.stableID }) {
@@ -90,7 +104,8 @@ final class PaneKitCache {
                 let parent = window.parentID ?? "—"
                 output += "• [\(type)] \(focusMark) ID: \(window.stableID) | Parent: \(parent) | App: \(window.bundleID)\n"
             }
-            return output
+            result = output
         }
+        return result
     }
 }
