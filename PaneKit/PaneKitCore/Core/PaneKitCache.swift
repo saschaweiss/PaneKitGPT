@@ -1,56 +1,84 @@
 import Foundation
 import CoreGraphics
 
-actor PaneKitCache {
+final class PaneKitCache {
     static let shared = PaneKitCache()
     private var cache: [String: PaneKitWindow] = [:]
+    private let lock = NSLock()
     
     private init() {}
     
     func store(_ window: PaneKitWindow) {
+        lock.lock()
         cache[window.stableID] = window
+        lock.unlock()
     }
     
     func store(_ windows: [PaneKitWindow]) {
+        lock.lock()
         for window in windows {
             cache[window.stableID] = window
         }
+        lock.unlock()
     }
     
     func get(_ stableID: String) -> PaneKitWindow? {
-        cache[stableID]
+        lock.lock()
+        let result = cache[stableID]
+        lock.unlock()
+        return result
     }
     
     func all() -> [PaneKitWindow] {
-        Array(cache.values)
+        lock.lock()
+        let result = Array(cache.values)
+        lock.unlock()
+        return result
     }
     
     func focusedWindow() -> PaneKitWindow? {
-        cache.values.first(where: { $0.isFocused })
+        lock.lock()
+        let result = cache.values.first(where: { $0.isFocused })
+        lock.unlock()
+        return result
     }
     
     func remove(_ stableID: String) {
+        lock.lock()
         cache.removeValue(forKey: stableID)
+        lock.unlock()
     }
     
     func removeAll(where predicate: (PaneKitWindow) -> Bool) {
+        lock.lock()
         cache = cache.filter { !predicate($0.value) }
+        lock.unlock()
     }
     
     func clear() {
+        lock.lock()
         cache.removeAll()
+        lock.unlock()
     }
     
     func contains(_ stableID: String) -> Bool {
-        cache.keys.contains(stableID)
+        lock.lock()
+        let result = cache.keys.contains(stableID)
+        lock.unlock()
+        return result
     }
     
     func count() -> Int {
-        cache.count
+        lock.lock()
+        let result = cache.count
+        lock.unlock()
+        return result
     }
     
     func debugDump() -> String {
+        lock.lock()
         guard !cache.isEmpty else {
+            lock.unlock()
             return "🪶 PaneKitCache leer"
         }
         var output = "📦 PaneKitCache Inhalt (\(cache.count) Elemente):\n"
@@ -60,6 +88,7 @@ actor PaneKitCache {
             let parent = window.parentID ?? "—"
             output += "• [\(type)] \(focusMark) ID: \(window.stableID) | Parent: \(parent) | App: \(window.bundleID)\n"
         }
+        lock.unlock()
         return output
     }
 }
