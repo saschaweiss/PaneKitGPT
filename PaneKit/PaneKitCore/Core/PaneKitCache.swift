@@ -17,26 +17,16 @@ actor PaneKitCache {
         }
     }
     
-    // MARK: - Lesen
-    
     func get(_ stableID: String) -> PaneKitWindow? {
-        queue.sync {
-            cache[stableID]
-        }
+        cache[stableID]
     }
     
     func all() -> [PaneKitWindow] {
-        queue.sync {
-            Array(cache.values)
-        }
+        Array(cache.values)
     }
     
-    /// Gibt das aktuell fokussierte Fenster zurück, falls bekannt.
-    /// Wichtig: `isFocused` darf **nicht** @MainActor isoliert sein.
     func focusedWindow() -> PaneKitWindow? {
-        queue.sync {
-            cache.values.first(where: { $0.isFocused })
-        }
+        cache.values.first(where: { $0.isFocused })
     }
     
     // MARK: - Entfernen
