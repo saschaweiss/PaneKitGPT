@@ -1,16 +1,8 @@
 import Foundation
 import CoreGraphics
 
-/// Thread-sicherer In-Memory-Cache für PaneKitWindow.
-/// Identifiziert Fenster eindeutig über `stableID`.
-/// Nur PaneKitManager (und später EventManager) darf schreiben.
-@unchecked Sendable
-final class PaneKitCache {
-    
-    // MARK: - Singleton
+actor PaneKitCache {
     static let shared = PaneKitCache()
-    
-    // MARK: - Private Storage
     private var cache: [String: PaneKitWindow] = [:] // stableID -> Window
     private let queue = DispatchQueue(label: "com.panekit.cache", attributes: .concurrent)
     
