@@ -49,6 +49,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"PaneKitCore-Bridging-Header.h",
+				PaneKitCore/Core/Untitled.swift,
 			);
 			target = FA78E63A2EAA28B30057DA7C /* PaneKitCore */;
 		};
