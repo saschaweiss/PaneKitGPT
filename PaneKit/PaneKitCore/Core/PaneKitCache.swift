@@ -17,15 +17,15 @@ final class PaneKitCache {
     private init() {}
     
     func store(_ window: PaneKitWindow) {
-        queue.async(flags: .barrier) {
-            self.cache[window.stableID] = window
+        queue.async(flags: .barrier) { [self] in
+            cache[window.stableID] = window
         }
     }
     
     func store(_ windows: [PaneKitWindow]) {
-        queue.async(flags: .barrier) {
+        queue.async(flags: .barrier) { [self] in
             for window in windows {
-                self.cache[window.stableID] = window
+                cache[window.stableID] = window
             }
         }
     }
