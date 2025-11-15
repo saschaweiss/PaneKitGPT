@@ -468,6 +468,7 @@ extension PaneKitWindow {
             parentID: parentID
         )
         
+        let window = PaneKitWindow(pkWindow: pkWindow)
         return window
     }
     
