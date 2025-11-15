@@ -428,6 +428,73 @@ extension PaneKitWindow {
     public var isTab: Bool { windowType == .tab }
     public var isWindow: Bool { windowType == .window }
     public var screenName: String { screen?.localizedName ?? "Unknown screen" }
+    
+    static func fromAXElement(_ element: AXUIElement) -> PaneKitWindow? {
+        var windowFrame = CGRect.zero
+        var appBundleID: String?
+        var windowTitle: String?
+        var screen: NSScreen?
+        var parentID: String?
+        
+        // Frame
+        if let position = copyAXValue(for: kAXPositionAttribute, of: element) as? CGPoint,
+           let size = copyAXValue(for: kAXSizeAttribute, of: element) as? CGSize {
+            windowFrame = CGRect(origin: position, size: size)
+        }
+        
+        // Bundle ID
+        if let appElement = copyAXValue(for: kAXParentAttribute, of: element) as? AXUIElement {
+            var pid: pid_t = 0
+            AXUIElementGetPid(appElement, &pid)
+            if let app = NSRunningApplication(processIdentifier: pid) {
+                appBundleID = app.bundleIdentifier
+            }
+        }
+        
+        // Title
+        windowTitle = copyAXValue(for: kAXTitleAttribute, of: element) as? String
+        
+        // Screen (vereinfachte Heuristik – kann später verbessert werden)
+        screen = NSScreen.screens.first(where: { $0.frame.intersects(windowFrame) }) ?? NSScreen.main
+        
+        // ParentID – bei Tabs oder Child Windows
+        if let parent = copyAXValue(for: kAXParentAttribute, of: element) as? AXUIElement {
+            parentID = stableID(for: parent)
+        }
+        
+        // StableID – wird direkt aus dem Element generiert
+        let stableID = stableID(for: element)
+        
+        // Jetzt das Fensterobjekt bauen
+        let window = PaneKitWindow(
+            stableID: stableID,
+            bundleID: appBundleID ?? "unknown",
+            title: windowTitle ?? "Untitled",
+            frame: windowFrame,
+            screen: screen,
+            parentID: parentID,
+            isFocused: false,
+            zIndex: 0,
+            windowType: .window // Tabs erkennen wir später per Attribut
+        )
+        
+        return window
+    }
+    
+    // MARK: - Hilfsfunktionen
+    
+    private static func copyAXValue(for attribute: CFString, of element: AXUIElement) -> AnyObject? {
+        var value: AnyObject?
+        AXUIElementCopyAttributeValue(element, attribute, &value)
+        return value
+    }
+    
+    private static func stableID(for element: AXUIElement) -> String {
+        var pid: pid_t = 0
+        AXUIElementGetPid(element, &pid)
+        let ptr = Unmanaged.passUnretained(element).toOpaque()
+        return "pid:\(pid)-ptr:\(UInt(bitPattern: ptr))"
+    }
 }
 
 public struct AppCollectorResult {
