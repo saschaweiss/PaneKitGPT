@@ -27,7 +27,33 @@ final class PaneKitEventManager {
     }
 }
 
-// MARK: - Event Dispatch
+extension PaneKitEventManager {
+    private func setupAccessibilityObservers() {
+        // Placeholder – später AXObserver integration
+        // Hier könnten AXObserverCreate + CFRunLoopAddSource etc. folgen
+    }
+    
+    private func setupWorkspaceObservers() {
+        let nc = NSWorkspace.shared.notificationCenter
+        
+        // Beispielhafte Workspace-Events:
+        observers.append(
+            nc.addObserver(forName: NSWorkspace.didActivateApplicationNotification,
+                           object: nil,
+                           queue: .main) { _ in
+                // später App Activation Event
+            }
+        )
+        
+        observers.append(
+            nc.addObserver(forName: NSWorkspace.didTerminateApplicationNotification,
+                           object: nil,
+                           queue: .main) { _ in
+                // später App Termination Event
+            }
+        )
+    }
+}
 
 extension PaneKitEventManager {
     func handleEvent(_ event: PaneKitEvent) {
