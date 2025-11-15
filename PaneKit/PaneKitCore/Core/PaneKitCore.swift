@@ -452,7 +452,18 @@ extension PaneKitWindow {
             title = axTitle
         }
         
-        screen = NSScreen.screens.first(where: { $0.frame.intersects(frame) }) ?? NSScreen.main
+        sscreen = NSScreen.screens.first(where: { $0.frame.intersects(frame) }) ?? NSScreen.main
+        
+        if let role = copyAXValue(for: kAXRoleAttribute, of: element) as? String {
+            switch role {
+            case kAXWindowRole as String:
+                windowType = .window
+            case kAXTabGroupRole as String, "AXTab", "AXSheet":
+                windowType = .tab
+            default:
+                windowType = .window
+            }
+        }
         
         if let parent = copyAXValue(for: AXAttr.parent.raw, of: element) {
             parentID = stableID(for: parent as! AXUIElement)
