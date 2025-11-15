@@ -32,9 +32,34 @@ final class PaneKitEventManager {
 }
 
 extension PaneKitEventManager {
-    private func setupAccessibilityObservers() {
-        // Placeholder – später AXObserver integration
-        // Hier könnten AXObserverCreate + CFRunLoopAddSource etc. folgen
+    private func attachToApp(_ app: NSRunningApplication) {
+        guard let axApp = AXUIElementCreateApplication(app.processIdentifier) as AXUIElement? else { return }
+        var observer: AXObserver?
+        
+        let callback: AXObserverCallback = { observer, element, notification, refcon in
+            guard let notification = notification as? String else { return }
+            Task { @MainActor in
+                PaneKitEventManager.shared.handleAXNotification(notification, element: element)
+            }
+        }
+        
+        if AXObserverCreate(app.processIdentifier, callback, &observer) == .success, let observer = observer {
+            observers[app.processIdentifier] = observer
+            
+            let notifications = [
+                kAXMovedNotification,
+                kAXResizedNotification,
+                kAXFocusedWindowChangedNotification,
+                kAXCreatedNotification,
+                kAXUIElementDestroyedNotification
+            ]
+            
+            for note in notifications {
+                AXObserverAddNotification(observer, axApp, note as CFString, nil)
+            }
+            
+            CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
+        }
     }
     
     private func setupWorkspaceObservers() {
