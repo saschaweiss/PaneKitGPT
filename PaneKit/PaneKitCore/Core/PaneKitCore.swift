@@ -465,7 +465,7 @@ extension PaneKitWindow {
             }
         }
         
-        if let parent = copyAXValue(for: AXAttr.parent.raw, of: element) {
+        if let parent = copyAXValue(for: kAXParentAttribute, of: element) {
             parentID = stableID(for: parent as! AXUIElement)
         }
         
