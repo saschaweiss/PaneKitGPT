@@ -15,7 +15,10 @@ final class PaneKitEventManager {
         guard !isRunning else { return }
         isRunning = true
         
-        setupAccessibilityObservers()
+        for app in NSWorkspace.shared.runningApplications where app.isFinishedLaunching && app.isActive {
+            attachToApp(app)
+        }
+        
         setupWorkspaceObservers()
     }
     
