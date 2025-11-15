@@ -6,7 +6,7 @@ final class PaneKitEventManager {
     static let shared = PaneKitEventManager()
     
     private var isRunning = false
-    private var observers: [Any] = [] // Platzhalter für AXObserver / NSWorkspace Notifications etc.
+    private var observers: [pid_t: AXObserver] = [:]
     
     private init() {}
     
