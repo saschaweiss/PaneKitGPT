@@ -438,7 +438,7 @@ extension PaneKitWindow {
         
         // Frame
         if let position = copyAXValue(for: AXAttr.position.raw, of: element) as? CGPoint,
-           let size = copyAXValue(for: kAXSizeAttribute, of: element) as? CGSize {
+           let size = copyAXValue(for: AXAttr.size.raw, of: element) as? CGSize {
             windowFrame = CGRect(origin: position, size: size)
         }
         
