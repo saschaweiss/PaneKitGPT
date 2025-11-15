@@ -430,23 +430,23 @@ extension PaneKitWindow {
     public var screenName: String { screen?.localizedName ?? "Unknown screen" }
     
     static func fromAXElement(_ element: AXUIElement) -> PaneKitWindow? {
-        var windowFrame = CGRect.zero
-        var appBundleID: String?
-        var windowTitle: String?
-        var screen: NSScreen?
+        var frame = CGRect.zero
+        var bundleID = "unknown"
+        var title = "Untitled"
+        var screen: NSScreen? = NSScreen.main
         var parentID: String?
         
-        if let position = copyAXValue(for: AXAttr.position.raw, of: element) as? CGPoint,
-           let size = copyAXValue(for: AXAttr.size.raw, of: element) as? CGSize {
-            windowFrame = CGRect(origin: position, size: size)
+        if let position = copyAXValue(for: kAXPositionAttribute, of: element) as? CGPoint,
+           let size = copyAXValue(for: kAXSizeAttribute, of: element) as? CGSize {
+            frame = CGRect(origin: position, size: size)
         }
         
-        if let appElement = copyAXValue(for: AXAttr.parent.raw, of: element) as? AXUIElement {
-            var pid: pid_t = 0
-            AXUIElementGetPid(appElement, &pid)
-            if let app = NSRunningApplication(processIdentifier: pid) {
-                appBundleID = app.bundleIdentifier
-            }
+        // App / Bundle ID
+        var pid: pid_t = 0
+        AXUIElementGetPid(element, &pid)
+        if let app = NSRunningApplication(processIdentifier: pid),
+           let bid = app.bundleIdentifier {
+            bundleID = bid
         }
         
         windowTitle = copyAXValue(for: AXAttr.title.raw, of: element) as? String
