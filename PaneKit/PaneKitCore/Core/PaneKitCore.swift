@@ -436,7 +436,6 @@ extension PaneKitWindow {
         var screen: NSScreen?
         var parentID: String?
         
-        // Frame
         if let position = copyAXValue(for: AXAttr.position.raw, of: element) as? CGPoint,
            let size = copyAXValue(for: AXAttr.size.raw, of: element) as? CGSize {
             windowFrame = CGRect(origin: position, size: size)
@@ -468,13 +467,11 @@ extension PaneKitWindow {
             parentID: parentID,
             isFocused: false,
             zIndex: 0,
-            windowType: .window 
+            windowType: .window
         )
         
         return window
     }
-    
-    // MARK: - Hilfsfunktionen
     
     private static func copyAXValue(for attribute: CFString, of element: AXUIElement) -> AnyObject? {
         var value: AnyObject?
