@@ -65,22 +65,15 @@ extension PaneKitEventManager {
     private func setupWorkspaceObservers() {
         let nc = NSWorkspace.shared.notificationCenter
         
-        // Beispielhafte Workspace-Events:
-        observers.append(
-            nc.addObserver(forName: NSWorkspace.didActivateApplicationNotification,
-                           object: nil,
-                           queue: .main) { _ in
-                // später App Activation Event
-            }
-        )
+        nc.addObserver(forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main) { [weak self] notif in
+            guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
+            self?.attachToApp(app)
+        }
         
-        observers.append(
-            nc.addObserver(forName: NSWorkspace.didTerminateApplicationNotification,
-                           object: nil,
-                           queue: .main) { _ in
-                // später App Termination Event
-            }
-        )
+        nc.addObserver(forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: .main) { [weak self] notif in
+            guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
+            self?.detachApp(app)
+        }
     }
 }
 
