@@ -441,11 +441,9 @@ extension PaneKitWindow {
             frame = CGRect(origin: position, size: size)
         }
         
-        // App / Bundle ID
         var pid: pid_t = 0
         AXUIElementGetPid(element, &pid)
-        if let app = NSRunningApplication(processIdentifier: pid),
-           let bid = app.bundleIdentifier {
+        if let app = NSRunningApplication(processIdentifier: pid), let bid = app.bundleIdentifier {
             bundleID = bid
         }
         
