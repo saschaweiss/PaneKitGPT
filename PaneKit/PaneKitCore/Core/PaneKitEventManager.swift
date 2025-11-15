@@ -83,24 +83,36 @@ extension PaneKitEventManager {
 }
 
 extension PaneKitEventManager {
-    func handleEvent(_ event: PaneKitEvent) {
-        switch event {
-        case .windowCreated(let window),
-             .tabCreated(let window):
-            PaneKitCache.shared.store(window)
+    private func handleAXNotification(_ name: String, element: AXUIElement) {
+        switch name {
+        case kAXFocusedWindowChangedNotification:
+            if let window = PaneKitWindow.fromAXElement(element) {
+                PaneKitCache.shared.store(window)
+                handleEvent(.focusChanged(stableID: window.stableID))
+            }
             
-        case .windowClosed(let stableID),
-             .tabClosed(let stableID):
-            PaneKitCache.shared.remove(stableID)
+        case kAXMovedNotification:
+            if let window = PaneKitWindow.fromAXElement(element) {
+                handleEvent(.windowMoved(stableID: window.stableID, frame: window.frame, screen: window.screen))
+            }
             
-        case .focusChanged(let stableID):
-            updateFocus(for: stableID)
+        case kAXResizedNotification:
+            if let window = PaneKitWindow.fromAXElement(element) {
+                handleEvent(.windowResized(stableID: window.stableID, frame: window.frame, screen: window.screen))
+            }
             
-        case .windowMoved(let stableID, let frame, let screen):
-            updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
+        case kAXCreatedNotification:
+            if let window = PaneKitWindow.fromAXElement(element) {
+                handleEvent(.windowCreated(window))
+            }
             
-        case .windowResized(let stableID, let frame, let screen):
-            updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
+        case kAXUIElementDestroyedNotification:
+            if let window = PaneKitWindow.fromAXElement(element) {
+                handleEvent(.windowClosed(stableID: window.stableID))
+            }
+            
+        default:
+            break
         }
     }
 }
