@@ -8,6 +8,7 @@ public final class PaneKitManager: Sendable {
 
     public private(set) var config: PaneKitConfiguration
     public let collector = PaneKitCollector.shared
+    private let cache = PaneKitCache.shared
     public private(set) var isRunning = false
 
     private init() {
@@ -59,6 +60,9 @@ public final class PaneKitManager: Sendable {
 
                     let role = window.pkWindow.role.lowercased()
                     if !role.contains("window") { return false }
+                    
+                    cache.store(window)
+                    print("📑 Added window '\(window.title)' for \(window.appName)1234")
 
                     return true
                 }
@@ -69,9 +73,10 @@ public final class PaneKitManager: Sendable {
                             let tabs = await PaneKitCollector.collectTabs(for: window)
                             for tab in tabs {
                                 if await self.config.enableLogging {
-                                    print("📑 Added tab '\(await tab.title)' for \(await window.appName)")
+                                    await self.cache.store(tab)
+                                    print("📑 Added tab \(await window.appName) -> '\(await tab.title)'")
                                 }
-                            }
+                            } 
                         }
                     }
                 }

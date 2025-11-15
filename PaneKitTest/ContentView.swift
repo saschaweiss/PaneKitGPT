@@ -2,9 +2,24 @@ import SwiftUI
 import PaneKitCore
 
 @main
-struct ContentView: App {
+struct PaneKitApp: App {
+    @State private var paneKit = PaneKit(notifyOnMainThread: true, enableLogging: true, includingTabs: true)
+    @State private var windows: [PaneKitWindow] = []
+    @State private var isLoading = false
+    @State private var showTabs = true
     
-    /*
+    init() {
+        print("kkk")
+    }
+
+    var body: some Scene {
+        WindowGroup { EmptyView() }
+    }
+}
+
+/*
+@main
+struct ContentView: App {
     @State private var paneKit = PaneKit(notifyOnMainThread: true, enableLogging: true, includingTabs: true)
     @State private var windows: [PaneKitWindow] = []
     @State private var isLoading = false
@@ -48,16 +63,8 @@ struct ContentView: App {
             MainContentView(cacheModel: cacheModel, isLoading: $isLoading, showTabs: $showTabs)
         }
     }
-     */
-    
-    var body: some Scene {
-        WindowGroup {
-            
-        }
-    }
 }
 
-/*
 extension ContentView {
     static func registerWindowEvents(for window: PaneKitWindow) async {
         await window.onEvent("focus") { snapshot in

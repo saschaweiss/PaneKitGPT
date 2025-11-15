@@ -133,7 +133,7 @@ public final class PaneKitWindow: Identifiable, Hashable, @unchecked Sendable {
         
         self.lastUpdate = Date()
         
-        print("create PaneKitWindow (\(self.windowType)): \(self.appName) - \(self.title)")
+        //print("create PaneKitWindow (\(self.windowType)): \(self.appName) - \(self.title)")
 
         var isSettable: DarwinBoolean = false
         if AXUIElementIsAttributeSettable(pkWindow.axElement, AXAttr.title.raw, &isSettable) == .success {
