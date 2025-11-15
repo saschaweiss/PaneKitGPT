@@ -78,8 +78,6 @@ extension PaneKitEventManager {
     }
 }
 
-// MARK: - Internal Update Logic
-
 extension PaneKitEventManager {
     private func updateFocus(for stableID: String) {
         for window in PaneKitCache.shared.all() {
@@ -87,7 +85,7 @@ extension PaneKitEventManager {
         }
     }
     
-    private func updateWindowPosition(stableID: String, frame: CGRect, screen: String) {
+    private func updateWindowPosition(stableID: String, frame: CGRect, screen: NSScreen) {
         guard let window = PaneKitCache.shared.get(stableID) else { return }
         window.frame = frame
         window.screen = screen
@@ -95,12 +93,10 @@ extension PaneKitEventManager {
     }
     
     private func fetchZIndex(for window: PaneKitWindow) -> Int {
-        // Später durch echte AX/CGWindowList API ersetzen
+        // TODO: Replace with CGWindowListCopyWindowInfo logic
         return 0
     }
 }
-
-// MARK: - Event Type Definition
 
 enum PaneKitEvent {
     case windowCreated(PaneKitWindow)
@@ -108,6 +104,6 @@ enum PaneKitEvent {
     case tabCreated(PaneKitWindow)
     case tabClosed(stableID: String)
     case focusChanged(stableID: String)
-    case windowMoved(stableID: String, frame: CGRect, screen: String)
-    case windowResized(stableID: String, frame: CGRect, screen: String)
+    case windowMoved(stableID: String, frame: CGRect, screen: NSScreen)
+    case windowResized(stableID: String, frame: CGRect, screen: NSScreen)
 }
