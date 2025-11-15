@@ -447,13 +447,17 @@ extension PaneKitWindow {
             bundleID = bid
         }
         
-        windowTitle = copyAXValue(for: AXAttr.title.raw, of: element) as? String
-        screen = NSScreen.screens.first(where: { $0.frame.intersects(windowFrame) }) ?? NSScreen.main
-        
-        if let parent = copyAXValue(for: AXAttr.parent.raw, of: element) as? AXUIElement {
-            parentID = stableID(for: parent)
+        if let axTitle = copyAXValue(for: kAXTitleAttribute, of: element) as? String {
+            title = axTitle
         }
         
+        screen = NSScreen.screens.first(where: { $0.frame.intersects(frame) }) ?? NSScreen.main
+        
+        if let parent = copyAXValue(for: kAXParentAttribute, of: element) {
+            parentID = stableID(for: parent as! AXUIElement)
+        }
+        
+        // StableID
         let stableID = stableID(for: element)
         
         let window = PaneKitWindow(
