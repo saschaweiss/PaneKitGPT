@@ -480,6 +480,8 @@ extension PaneKitWindow {
         pkWindow.parentID = parentID
         
         let window = PaneKitWindow(pkWindow: pkWindow)
+        window.windowType = windowType
+
         return window
     }
     
@@ -488,7 +490,7 @@ extension PaneKitWindow {
         AXUIElementCopyAttributeValue(element, attribute, &value)
         return value
     }
-    
+
     private static func stableID(for element: AXUIElement) -> String {
         var pid: pid_t = 0
         AXUIElementGetPid(element, &pid)
