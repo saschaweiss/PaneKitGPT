@@ -448,7 +448,7 @@ extension PaneKitWindow {
             bundleID = bid
         }
         
-        if let axTitle = copyAXValue(for: AXAttr.title.raw, of: element) as? String {
+        if let axTitle = copyAXValue(for: kAXTitleAttribute, of: element) as? String {
             title = axTitle
         }
         
