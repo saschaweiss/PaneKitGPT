@@ -443,7 +443,7 @@ extension PaneKitWindow {
         }
         
         // Bundle ID
-        if let appElement = copyAXValue(for: kAXParentAttribute, of: element) as? AXUIElement {
+        if let appElement = copyAXValue(for: AXAttr.parent.raw, of: element) as? AXUIElement {
             var pid: pid_t = 0
             AXUIElementGetPid(appElement, &pid)
             if let app = NSRunningApplication(processIdentifier: pid) {
@@ -452,7 +452,7 @@ extension PaneKitWindow {
         }
         
         // Title
-        windowTitle = copyAXValue(for: kAXTitleAttribute, of: element) as? String
+        windowTitle = copyAXValue(for: AXAttr.title.raw, of: element) as? String
         
         // Screen (vereinfachte Heuristik – kann später verbessert werden)
         screen = NSScreen.screens.first(where: { $0.frame.intersects(windowFrame) }) ?? NSScreen.main
