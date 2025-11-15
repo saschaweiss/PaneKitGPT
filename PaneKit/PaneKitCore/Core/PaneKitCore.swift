@@ -435,6 +435,7 @@ extension PaneKitWindow {
         var title = "Untitled"
         var screen: NSScreen? = NSScreen.main
         var parentID: String?
+        var windowType: PaneKitWindowType = .window
         
         if let position = copyAXValue(for: AXAttr.position.raw, of: element) as? CGPoint,
            let size = copyAXValue(for: AXAttr.size.raw, of: element) as? CGSize {
@@ -459,14 +460,13 @@ extension PaneKitWindow {
         
         let stableID = stableID(for: element)
         
-        let pkWindow = PKWindow(
-            stableID: stableID,
-            frame: frame,
-            bundleID: bundleID,
-            title: title,
-            screen: screen,
-            parentID: parentID
-        )
+        let pkWindow = PKWindow()
+        pkWindow.stableID = stableID
+        pkWindow.frame = frame
+        pkWindow.bundleID = bundleID
+        pkWindow.title = title
+        pkWindow.screen = screen
+        pkWindow.parentID = parentID
         
         let window = PaneKitWindow(pkWindow: pkWindow)
         return window
