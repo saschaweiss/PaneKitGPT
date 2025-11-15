@@ -458,7 +458,7 @@ extension PaneKitWindow {
         screen = NSScreen.screens.first(where: { $0.frame.intersects(windowFrame) }) ?? NSScreen.main
         
         // ParentID – bei Tabs oder Child Windows
-        if let parent = copyAXValue(for: kAXParentAttribute, of: element) as? AXUIElement {
+        if let parent = copyAXValue(for: AXAttr.parent.raw, of: element) as? AXUIElement {
             parentID = stableID(for: parent)
         }
         
