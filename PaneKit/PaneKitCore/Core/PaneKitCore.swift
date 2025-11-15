@@ -442,7 +442,6 @@ extension PaneKitWindow {
             windowFrame = CGRect(origin: position, size: size)
         }
         
-        // Bundle ID
         if let appElement = copyAXValue(for: AXAttr.parent.raw, of: element) as? AXUIElement {
             var pid: pid_t = 0
             AXUIElementGetPid(appElement, &pid)
@@ -451,21 +450,15 @@ extension PaneKitWindow {
             }
         }
         
-        // Title
         windowTitle = copyAXValue(for: AXAttr.title.raw, of: element) as? String
-        
-        // Screen (vereinfachte Heuristik – kann später verbessert werden)
         screen = NSScreen.screens.first(where: { $0.frame.intersects(windowFrame) }) ?? NSScreen.main
         
-        // ParentID – bei Tabs oder Child Windows
         if let parent = copyAXValue(for: AXAttr.parent.raw, of: element) as? AXUIElement {
             parentID = stableID(for: parent)
         }
         
-        // StableID – wird direkt aus dem Element generiert
         let stableID = stableID(for: element)
         
-        // Jetzt das Fensterobjekt bauen
         let window = PaneKitWindow(
             stableID: stableID,
             bundleID: appBundleID ?? "unknown",
@@ -475,7 +468,7 @@ extension PaneKitWindow {
             parentID: parentID,
             isFocused: false,
             zIndex: 0,
-            windowType: .window // Tabs erkennen wir später per Attribut
+            windowType: .window 
         )
         
         return window
