@@ -120,12 +120,10 @@ extension PaneKitEventManager {
 extension PaneKitEventManager {
     func handleEvent(_ event: PaneKitEvent) {
         switch event {
-        case .windowCreated(let window),
-             .tabCreated(let window):
+        case .windowCreated(let window), .tabCreated(let window):
             PaneKitCache.shared.store(window)
             
-        case .windowClosed(let stableID),
-             .tabClosed(let stableID):
+        case .windowClosed(let stableID), .tabClosed(let stableID):
             PaneKitCache.shared.remove(stableID)
             
         case .focusChanged(let stableID):
