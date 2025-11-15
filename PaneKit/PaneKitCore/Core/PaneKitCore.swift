@@ -457,19 +457,15 @@ extension PaneKitWindow {
             parentID = stableID(for: parent as! AXUIElement)
         }
         
-        // StableID
         let stableID = stableID(for: element)
         
-        let window = PaneKitWindow(
+        let pkWindow = PKWindow(
             stableID: stableID,
-            bundleID: appBundleID ?? "unknown",
-            title: windowTitle ?? "Untitled",
-            frame: windowFrame,
+            frame: frame,
+            bundleID: bundleID,
+            title: title,
             screen: screen,
-            parentID: parentID,
-            isFocused: false,
-            zIndex: 0,
-            windowType: .window
+            parentID: parentID
         )
         
         return window
