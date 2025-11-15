@@ -57,6 +57,7 @@ struct ContentView: App {
     }
 }
 
+/*
 extension ContentView {
     static func registerWindowEvents(for window: PaneKitWindow) async {
         await window.onEvent("focus") { snapshot in
@@ -267,3 +268,4 @@ struct MainContentView: View {
         print("🧹 Cache cleared")
     }
 }
+*/
