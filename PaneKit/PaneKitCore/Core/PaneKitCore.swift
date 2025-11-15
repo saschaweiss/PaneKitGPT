@@ -464,8 +464,16 @@ extension PaneKitWindow {
             }
         }
         
-        if let parent = copyAXValue(for: kAXParentAttribute, of: element) {
-            parentID = stableID(for: parent as! AXUIElement)
+        let pkWindow = PKWindow()
+        pkWindow.frame = frame
+        pkWindow.bundleID = bundleID
+        pkWindow.title = title
+        pkWindow.screen = screen
+        
+        if let parent = copyAXValue(for: kAXParentAttribute, of: element) as? AXUIElement {
+            if let parentPK = PKWindow(axElement: parent) {
+                parentID = parentPK.stableID
+            }
         }
         
         let stableID = stableID(for: element)
