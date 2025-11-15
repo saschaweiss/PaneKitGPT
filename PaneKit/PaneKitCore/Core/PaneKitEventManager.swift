@@ -19,6 +19,9 @@ final class PaneKitEventManager {
     }
     
     func stop() {
+        for observer in observers {
+            NotificationCenter.default.removeObserver(observer)
+        }
         observers.removeAll()
         isRunning = false
     }
