@@ -477,7 +477,7 @@ extension PaneKitWindow {
         }
         
         let window = PaneKitWindow(pkWindow: pkWindow)
-        window.windowType = windowType
+        assert(window.stableID.count > 0, "⚠️ PaneKitWindow hat keine gültige stableID – PKWindow sollte sie setzen!")
 
         return window
     }
