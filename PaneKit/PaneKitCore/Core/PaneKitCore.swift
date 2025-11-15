@@ -457,8 +457,6 @@ extension PaneKitWindow {
         
         if let role = copyAXValue(for: kAXRoleAttribute, of: element) as? String {
             switch role {
-            case kAXWindowRole as String:
-                windowType = .window
             case kAXTabGroupRole as String, "AXTab", "AXSheet":
                 windowType = .tab
             default:
