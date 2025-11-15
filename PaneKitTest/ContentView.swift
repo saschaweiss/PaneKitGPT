@@ -3,6 +3,8 @@ import PaneKitCore
 
 @main
 struct ContentView: App {
+    
+    /*
     @State private var paneKit = PaneKit(notifyOnMainThread: true, enableLogging: true, includingTabs: true)
     @State private var windows: [PaneKitWindow] = []
     @State private var isLoading = false
@@ -46,6 +48,7 @@ struct ContentView: App {
             MainContentView(cacheModel: cacheModel, isLoading: $isLoading, showTabs: $showTabs)
         }
     }
+     */
 }
 
 extension ContentView {
