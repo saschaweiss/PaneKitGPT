@@ -453,7 +453,7 @@ extension PaneKitWindow {
             title = axTitle
         }
         
-        sscreen = NSScreen.screens.first(where: { $0.frame.intersects(frame) }) ?? NSScreen.main
+        screen = NSScreen.screens.first(where: { $0.frame.intersects(frame) }) ?? NSScreen.main
         
         if let role = copyAXValue(for: kAXRoleAttribute, of: element) as? String {
             switch role {
@@ -486,13 +486,6 @@ extension PaneKitWindow {
         var value: AnyObject?
         AXUIElementCopyAttributeValue(element, attribute, &value)
         return value
-    }
-
-    private static func stableID(for element: AXUIElement) -> String {
-        var pid: pid_t = 0
-        AXUIElementGetPid(element, &pid)
-        let ptr = Unmanaged.passUnretained(element).toOpaque()
-        return "pid:\(pid)-ptr:\(UInt(bitPattern: ptr))"
     }
 }
 
