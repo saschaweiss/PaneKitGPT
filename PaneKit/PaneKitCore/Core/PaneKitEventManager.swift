@@ -1,5 +1,6 @@
 import Foundation
-import CoreGraphics
+import AppKit
+import ApplicationServices
 
 @MainActor
 final class PaneKitEventManager {
@@ -19,8 +20,8 @@ final class PaneKitEventManager {
     }
     
     func stop() {
-        for observer in observers {
-            NotificationCenter.default.removeObserver(observer)
+        for observer in observers.values {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
         }
         observers.removeAll()
         isRunning = false
