@@ -153,8 +153,7 @@ extension PaneKitEventManager {
     }
     
     private func fetchZIndex(for window: PaneKitWindow) -> Int {
-        // TODO: Replace with CGWindowListCopyWindowInfo logic
-        return 0
+        return 0 // später echte CGWindowListCopyWindowInfo-Implementierung
     }
 }
 
