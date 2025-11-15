@@ -476,16 +476,6 @@ extension PaneKitWindow {
             }
         }
         
-        let stableID = stableID(for: element)
-        
-        let pkWindow = PKWindow()
-        pkWindow.stableID = stableID
-        pkWindow.frame = frame
-        pkWindow.bundleID = bundleID
-        pkWindow.title = title
-        pkWindow.screen = screen
-        pkWindow.parentID = parentID
-        
         let window = PaneKitWindow(pkWindow: pkWindow)
         window.windowType = windowType
 
