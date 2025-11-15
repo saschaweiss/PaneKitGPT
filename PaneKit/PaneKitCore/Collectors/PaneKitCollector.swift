@@ -131,35 +131,6 @@ open class PaneKitCollector: @unchecked Sendable {
 
         window.updateStableID(newID)
     }
-    
-    public static func delta(for bundleID: String) async -> (added: [PaneKitWindow], removed: [PaneKitWindow]) {
-        /*
-        let cached = await PaneKitCache.shared.windows(forBundleID: bundleID)
-        let cachedIDs = Set(cached.map(\.stableID))
-        
-        let newWindows = try await collectWindows(for: bundleID)
-        let newIDs = Set(newWindows.map(\.stableID))
-        
-        let addedIDs = newIDs.subtracting(cachedIDs)
-        let removedIDs = cachedIDs.subtracting(newIDs)
-        
-        let added = newWindows.filter { addedIDs.contains($0.stableID) }
-        let removed = cached.filter { removedIDs.contains($0.stableID) }
-        
-        if !added.isEmpty || !removed.isEmpty {
-            await MainActor.run {
-                for win in added {
-                    Task { await PaneKitCache.shared.store(win) }
-                }
-                for win in removed {
-                    Task { await PaneKitCache.shared.remove(byStableID: win.stableID) }
-                }
-            }
-        }
-        
-        return (added, removed)
-         */
-    }
 }
 
 extension Application {
