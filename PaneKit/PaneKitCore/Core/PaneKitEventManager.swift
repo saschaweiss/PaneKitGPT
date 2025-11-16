@@ -104,14 +104,18 @@ extension PaneKitEventManager {
             AXObserverAddNotification(observer, axApp, note as CFString, nil)
         }
         
-        var rawWindows: CFTypeRef?
-        if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &rawWindows) == .success,
-           let windowArray = rawWindows as? [Any],
-           let windows = windowArray as? [AXUIElement] {
-            for win in windows {
-                for note in notifications {
-                    AXObserverAddNotification(observer, win, note as CFString, nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            var value: CFTypeRef?
+            if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &value) == .success,
+               let windowArray = value as? [Any],
+               let windows = windowArray as? [AXUIElement] {
+                print("🪟 \(windows.count) Fenster beobachtet in \(app.localizedName ?? "Unbekannt")")
+                for win in windows {
+                    AXObserverAddNotification(observer, win, kAXMovedNotification as CFString, nil)
+                    AXObserverAddNotification(observer, win, kAXResizedNotification as CFString, nil)
                 }
+            } else {
+                print("⚠️ Keine Fenster gefunden für \(app.localizedName ?? "Unbekannt")")
             }
         }
         
@@ -185,14 +189,10 @@ extension PaneKitEventManager {
             let newFrame = window.frame
             let oldFrame = lastKnownFrames[stableID] ?? .zero
             
-            // Wenn sich der Frame nicht geändert hat → raus
             guard !newFrame.equalTo(oldFrame) else { return }
             lastKnownFrames[stableID] = newFrame
-
-            // Vorherigen WorkItem abbrechen, falls noch aktiv
             moveResizeWorkItems[stableID]?.cancel()
 
-            // Neuen Debounce-Task anlegen
             let workItem = DispatchWorkItem { [weak self] in
                 guard let self else { return }
                 Task { @MainActor in
@@ -200,7 +200,6 @@ extension PaneKitEventManager {
                 }
             }
 
-            // Speichern und verzögert ausführen
             moveResizeWorkItems[stableID] = workItem
             DispatchQueue.main.asyncAfter(deadline: .now() + moveResizeDelay, execute: workItem)
 
