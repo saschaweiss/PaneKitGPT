@@ -144,7 +144,9 @@ extension PaneKitEventManager {
         lastEventTimestamp = .now
         
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
-        if PaneKitEventManager.suppressedStableIDs.contains(window.stableID) {
+        let stableID = window.stableID
+
+        if let lastUpdate = Self.suppressedStableIDs[stableID], Date().timeIntervalSince(lastUpdate) < 0.5 {
             return
         }
         
