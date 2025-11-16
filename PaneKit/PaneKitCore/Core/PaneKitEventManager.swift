@@ -112,6 +112,18 @@ extension PaneKitEventManager {
             self.detachApp(app)
         }
     }
+    
+    func scheduleRecoveryIfNeeded() {
+        guard recoveryTimer == nil else { return }
+        
+        recoveryTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.recoverIfNeeded()
+            }
+        }
+        
+        print("🩺 Recovery-Timer aktiviert (alle 20s).")
+    }
 }
 
 extension PaneKitEventManager {
