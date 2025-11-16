@@ -98,7 +98,7 @@ extension PaneKitEventManager {
         
         if observers.isEmpty {
             print("⚠️ Keine aktiven AXObserver mehr – Recovery geplant.")
-            scheduleRecoveryIfNeeded()
+            PaneKitManager.shared.scheduleRecoveryIfNeeded()
         }
     }
     
