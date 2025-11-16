@@ -248,12 +248,11 @@ extension PaneKitEventManager {
 
         Self.suppressedStableIDs[stableID] = Date()
         
-        defer {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                PaneKitEventManager.suppressedStableIDs.remove(stableID)
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            Self.suppressedStableIDs.removeValue(forKey: stableID)
         }
         
+
         guard let window = PaneKitCache.shared.get(stableID) else { return }
         window.frame = frame
         window.screen = screen
