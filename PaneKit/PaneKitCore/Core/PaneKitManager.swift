@@ -118,8 +118,8 @@ public final class PaneKitManager: Sendable {
     public func recoverIfNeeded() {
         if !self.isHealthy {
             print("⚠️ EventManager inaktiv – versuche Neuverbindung...")
-            self.stop()
-            self.start()
+            eventManager.stop()
+            eventManager.start()
         }
     }
     
