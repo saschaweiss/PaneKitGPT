@@ -146,7 +146,7 @@ extension PaneKitEventManager {
     
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
-        
+
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
         let stableID = window.stableID
 
