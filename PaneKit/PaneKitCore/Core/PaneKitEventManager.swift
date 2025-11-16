@@ -166,19 +166,31 @@ extension PaneKitEventManager {
                 handleEvent(.focusChanged(stableID: stableID))
 
             case kAXMovedNotification, kAXResizedNotification:
-                if let screen = window.screen {
-                    let newFrame = window.frame
-                    let oldFrame = lastKnownFrames[stableID] ?? .zero
+                guard let screen = window.screen else { return }
+                let newFrame = window.frame
+                let oldFrame = lastKnownFrames[stableID] ?? .zero
 
-                    // Prüfen, ob sich die Position oder Größe tatsächlich verändert hat
-                    if abs(newFrame.origin.x - oldFrame.origin.x) > 1 ||
-                       abs(newFrame.origin.y - oldFrame.origin.y) > 1 ||
-                       abs(newFrame.size.width - oldFrame.size.width) > 1 ||
-                       abs(newFrame.size.height - oldFrame.size.height) > 1 {
+                // Wenn sich der Frame wirklich ändert
+                if !newFrame.equalTo(oldFrame) {
+                    lastKnownFrames[stableID] = newFrame
 
-                        // Aktualisieren und Event senden
-                        lastKnownFrames[stableID] = newFrame
-                        handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
+                    // Wenn Maus gedrückt → nur merken, nicht loggen
+                    if NSEvent.pressedMouseButtons != 0 {
+                        Self.pendingWindowChanges[stableID] = (newFrame, screen, Date())
+                        isDragging = true
+                    } else {
+                        // Nur EINMAL loggen, wenn Drag vorbei
+                        if isDragging {
+                            isDragging = false
+                            if let (frame, screen, _) = Self.pendingWindowChanges[stableID] {
+                                Self.pendingWindowChanges.removeAll()
+                                updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
+                            } else {
+                                updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
+                            }
+                        } else {
+                            updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
+                        }
                     }
                 }
 
@@ -263,15 +275,15 @@ extension PaneKitEventManager {
     }
     
     private func updateWindowPosition(stableID: String, frame: CGRect, screen: NSScreen) {
-        print("updateWindowPosition (executing once per completed drag)")
-
-        Self.suppressedStableIDs[stableID] = Date()
+        guard let window = PaneKitCache.shared.get(stableID) else { return }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            Self.suppressedStableIDs.removeValue(forKey: stableID)
+        if let last = lastKnownFrames[stableID], last.equalTo(frame) {
+            return
         }
 
-        guard let window = PaneKitCache.shared.get(stableID) else { return }
+        print("updateWindowPosition (executing once per completed drag)")
+        lastKnownFrames[stableID] = frame
+
         window.frame = frame
         window.screen = screen
         window.zIndex = fetchZIndex(for: window)
