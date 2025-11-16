@@ -181,35 +181,29 @@ extension PaneKitEventManager {
         let stableID = window.stableID
 
         if name == AXNotify.moved.string || name == AXNotify.resized.string {
-            print("move/resize")
             guard let screen = window.screen else { return }
             let newFrame = window.frame
             let oldFrame = lastKnownFrames[stableID] ?? .zero
             
+            // Wenn sich der Frame nicht geändert hat → raus
             guard !newFrame.equalTo(oldFrame) else { return }
             lastKnownFrames[stableID] = newFrame
 
-            if NSEvent.pressedMouseButtons != 0 {
-                Self.pendingWindowChanges[stableID] = (newFrame, screen, Date())
-                isDragging = true
-                return
-            }
-            
-            print("move/resize 2")
+            // Vorherigen WorkItem abbrechen, falls noch aktiv
+            moveResizeWorkItems[stableID]?.cancel()
 
-            if isDragging {
-                isDragging = false
-
-                if let (frame, screen, _) = Self.pendingWindowChanges[stableID] {
-                    Self.pendingWindowChanges.removeAll()
-                    updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
-                } else {
-                    updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
+            // Neuen Debounce-Task anlegen
+            let workItem = DispatchWorkItem { [weak self] in
+                guard let self else { return }
+                Task { @MainActor in
+                    self.updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
                 }
-                return
             }
 
-            updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
+            // Speichern und verzögert ausführen
+            moveResizeWorkItems[stableID] = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + moveResizeDelay, execute: workItem)
+
             return
         }
         
