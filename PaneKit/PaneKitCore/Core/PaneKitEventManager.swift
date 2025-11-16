@@ -192,6 +192,8 @@ extension PaneKitEventManager {
                 isDragging = true
                 return
             }
+            
+            print("move/resize 2")
 
             if isDragging {
                 isDragging = false
