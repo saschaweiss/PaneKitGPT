@@ -138,6 +138,7 @@ extension PaneKitEventManager {
     private static let moveResizeDebounceInterval: TimeInterval = 0.25
     private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen, lastUpdate: Date)] = [:]
     private static var debounceTimer: Timer?
+    private var suppressedStableIDs: Set<String> = []
     
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
@@ -190,29 +191,6 @@ extension PaneKitEventManager {
             case .windowMoved(let stableID, let frame, let screen),
                  .windowResized(let stableID, let frame, let screen):
                 handleMoveOrResize(stableID: stableID, frame: frame, screen: screen)
-        }
-    }
-    
-    @MainActor
-    private func debounceMoveResizeEvents() {
-        if NSEvent.pressedMouseButtons != 0 {
-            isDragging = true
-            return
-        }
-
-        if isDragging {
-            isDragging = false
-
-            let changes = Self.pendingWindowChanges
-            Self.pendingWindowChanges.removeAll()
-
-            for (stableID, change) in changes {
-                self.updateWindowPosition(
-                    stableID: stableID,
-                    frame: change.frame,
-                    screen: change.screen
-                )
-            }
         }
     }
     
