@@ -213,32 +213,6 @@ extension PaneKitEventManager {
                 PaneKitCache.shared.store(window)
                 handleEvent(.focusChanged(stableID: stableID))
 
-            case AXNotify.moved.string, AXNotify.resized.string:
-                guard let screen = window.screen else { return }
-                let newFrame = window.frame
-                let oldFrame = lastKnownFrames[stableID] ?? .zero
-
-                if !newFrame.equalTo(oldFrame) {
-                    lastKnownFrames[stableID] = newFrame
-
-                    if NSEvent.pressedMouseButtons != 0 {
-                        Self.pendingWindowChanges[stableID] = (newFrame, screen, Date())
-                        isDragging = true
-                    } else {
-                        if isDragging {
-                            isDragging = false
-                            if let (frame, screen, _) = Self.pendingWindowChanges[stableID] {
-                                Self.pendingWindowChanges.removeAll()
-                                updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
-                            } else {
-                                updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
-                            }
-                        } else {
-                            updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
-                        }
-                    }
-                }
-
             case AXNotify.created.string:
                 handleEvent(.windowCreated(window))
                 if let observer = observers[window.pid] {
@@ -248,7 +222,7 @@ extension PaneKitEventManager {
 
             case AXNotify.uiElementDestroyed.string:
                 handleEvent(.windowClosed(stableID: stableID))
-                
+
             default:
                 break
         }
