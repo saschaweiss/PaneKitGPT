@@ -11,22 +11,10 @@ final class PaneKitEventManager {
     private var lastEventTimestamp: Date = .now
     private var suppressedIDs: Set<String> = []
     
-    private var isDragging: Bool = false
-    private var lastStableID: String?
-    private var lastDraggedStableID: String?
-    private var lastFrameDuringDrag: CGRect?
-    private var lastScreenDuringDrag: NSScreen?
     private var lastKnownFrames: [String: CGRect] = [:]
-    private var lastResizeTimestamps: [String: Date] = [:]
-    private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen, lastUpdate: Date)] = [:]
-    private static let moveResizeDebounceInterval: TimeInterval = 0.25
-    private var moveResizeWorkItems: [String: DispatchWorkItem] = [:]
-    private let moveResizeDelay: TimeInterval = 0.15
     private let eventQueue = DispatchQueue(label: "com.panekit.axevents", qos: .userInteractive)
     private var pendingEvents: [(String, AXUIElement)] = []
-    
-    private var resizeSamples: [String: [CGSize]] = [:]
-    private var moveSamples: [String: [CGPoint]] = [:]
+    private let stabilizationDelay: TimeInterval = 0.1
     
     private init() {}
     
@@ -125,6 +113,32 @@ extension PaneKitEventManager {
         }
         
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
+    }
+    
+    private func enqueueAXEvent(name: String, element: AXUIElement) {
+        eventQueue.async { [weak self] in
+            guard let self else { return }
+            self.pendingEvents.append((name, element))
+            // Wenn kein anderes Event läuft, verarbeiten
+            if self.pendingEvents.count == 1 {
+                self.processNextAXEvent()
+            }
+        }
+    }
+
+    private func processNextAXEvent() {
+        guard !pendingEvents.isEmpty else { return }
+        let (name, element) = pendingEvents.removeFirst()
+
+        // Synchron verarbeiten, garantiert auf MainQueue
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.handleAXNotification(name, element: element)
+            // Nächstes Event kurz danach
+            self.eventQueue.asyncAfter(deadline: .now() + 0.005) {
+                self.processNextAXEvent()
+            }
+        }
     }
     
     private func setupWorkspaceObservers() {
