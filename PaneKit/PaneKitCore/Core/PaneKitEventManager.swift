@@ -79,6 +79,7 @@ final class PaneKitEventManager {
         }
         
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
+        print("✅ AXObserver aktiv für PID \(app.processIdentifier)")
     }
     
     private func enqueueAXEvent(name: String, element: AXUIElement) {
