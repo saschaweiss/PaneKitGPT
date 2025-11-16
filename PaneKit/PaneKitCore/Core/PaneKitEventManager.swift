@@ -140,6 +140,10 @@ extension PaneKitEventManager {
     private static var debounceTimer: Timer?
     private static var suppressedStableIDs: [String: Date] = [:]
     
+    private var isDragging: Bool = false
+    private var lastDraggedStableID: String?
+    private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen)] = [:]
+    
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
         
@@ -251,7 +255,6 @@ extension PaneKitEventManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             Self.suppressedStableIDs.removeValue(forKey: stableID)
         }
-        
 
         guard let window = PaneKitCache.shared.get(stableID) else { return }
         window.frame = frame
