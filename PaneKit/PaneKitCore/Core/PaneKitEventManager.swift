@@ -99,23 +99,37 @@ extension PaneKitEventManager {
         
         if observers.isEmpty {
             print("⚠️ Keine aktiven AXObserver mehr – Recovery geplant.")
-            PaneKitManager.shared.scheduleRecoveryIfNeeded()
+            scheduleRecoveryIfNeeded()
         }
     }
     
+    @MainActor
     public func observeWorkspaceEvents() {
         let nc = NSWorkspace.shared.notificationCenter
         
         nc.addObserver(forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main) { [weak self] notif in
+            guard let self = self else { return }
             guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
+            
             print("🆕 App gestartet: \(app.localizedName ?? "Unbekannt")")
             self.attachToApp(app)
+            
+            // Lazy-Recovery triggern, falls AX-Anbindung verloren ging
+            PaneKitManager.shared.scheduleRecoveryIfNeeded()
         }
         
         nc.addObserver(forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: .main) { [weak self] notif in
+            guard let self = self else { return }
             guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
+            
             print("❌ App geschlossen: \(app.localizedName ?? "Unbekannt")")
             self.detachApp(app)
+            
+            // Falls alle Apps weg sind: Recovery vorbereiten
+            if self.observers.isEmpty {
+                print("⚠️ Keine aktiven AXObserver mehr – Recovery geplant.")
+                PaneKitManager.shared.scheduleRecoveryIfNeeded()
+            }
         }
     }
     
