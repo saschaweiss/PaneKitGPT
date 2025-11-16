@@ -96,6 +96,11 @@ extension PaneKitEventManager {
     func detachApp(_ app: NSRunningApplication) {
         guard let observer = observers.removeValue(forKey: app.processIdentifier) else { return }
         CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
+        
+        if observers.isEmpty {
+            print("⚠️ Keine aktiven AXObserver mehr – Recovery geplant.")
+            PaneKitManager.shared.scheduleRecoveryIfNeeded()
+        }
     }
     
     public func observeWorkspaceEvents() {
