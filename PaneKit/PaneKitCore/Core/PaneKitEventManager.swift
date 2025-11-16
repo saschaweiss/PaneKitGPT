@@ -233,6 +233,25 @@ extension PaneKitEventManager {
             updateWindowPosition(stableID: stableID, frame: change.frame, screen: change.screen)
         }
     }
+    
+    private func setupGlobalMouseTracking() {
+        NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { _ in
+            self.isDragging = true
+        }
+        NSEvent.addGlobalMonitorForEvents(matching: .leftMouseUp) { _ in
+            Task { @MainActor in
+                self.isDragging = false
+                if let id = self.lastDraggedStableID,
+                   let frame = self.lastFrameDuringDrag,
+                   let screen = self.lastScreenDuringDrag {
+                    self.updateWindowPosition(stableID: id, frame: frame, screen: screen)
+                }
+                self.lastDraggedStableID = nil
+                self.lastFrameDuringDrag = nil
+                self.lastScreenDuringDrag = nil
+            }
+        }
+    }
 
     @MainActor
     private func debounceFlushPendingChanges() {
