@@ -9,7 +9,7 @@ public final class PaneKitManager: Sendable {
     private var isRunning = false
     private var recoveryTimer: Timer?
     private let eventManager = PaneKitEventManager.shared
-    private(set) var config = PaneKitConfiguration.default
+    private(set) var config = PaneKitConfiguration()
     private let cache = PaneKitCache.shared
     
     private init() {}
@@ -93,7 +93,7 @@ public final class PaneKitManager: Sendable {
     public func stop() {
         eventManager.stop()
         cache.clear()
-        PaneKitEventManager.stop()
+        PaneKitEventManager.stopRecoveryTimer()
         isRunning = false
         print("🛑 PaneKitManager gestoppt.")
     }
