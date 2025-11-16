@@ -135,9 +135,7 @@ extension PaneKitEventManager {
                 break
         }
     }
-}
-
-extension PaneKitEventManager {
+    
     func handleEvent(_ event: PaneKitEvent) {
         switch event {
         case .windowCreated(let window), .tabCreated(let window):
