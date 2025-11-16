@@ -203,27 +203,18 @@ extension PaneKitEventManager {
             return
         }
 
-        Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: Self.moveResizeDebounceInterval, repeats: false) { [weak self] _ in
-            Task { @MainActor in
-                guard let self = self else { return }
-                
-                if NSEvent.pressedMouseButtons != 0 {
-                    self.debounceMoveResizeEvents()
-                    return
-                }
+        if DragState.isDragging {
+            DragState.isDragging = false
 
-                let changes = Self.pendingWindowChanges
-                Self.pendingWindowChanges.removeAll()
+            let changes = Self.pendingWindowChanges
+            Self.pendingWindowChanges.removeAll()
 
-                for (stableID, change) in changes {
-                    self.updateWindowPosition(
-                        stableID: stableID,
-                        frame: change.frame,
-                        screen: change.screen
-                    )
-                }
-                
-                isDragging = false
+            for (stableID, change) in changes {
+                self.updateWindowPosition(
+                    stableID: stableID,
+                    frame: change.frame,
+                    screen: change.screen
+                )
             }
         }
     }
