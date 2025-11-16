@@ -96,6 +96,22 @@ extension PaneKitEventManager {
         guard let observer = observers.removeValue(forKey: app.processIdentifier) else { return }
         CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
     }
+    
+    public func observeWorkspaceEvents() {
+        let nc = NSWorkspace.shared.notificationCenter
+        
+        nc.addObserver(forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main) { [weak self] notif in
+            guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
+            print("🆕 App gestartet: \(app.localizedName ?? "Unbekannt")")
+            self?.eventManager.attachToApp(app)
+        }
+        
+        nc.addObserver(forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: .main) { [weak self] notif in
+            guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
+            print("❌ App geschlossen: \(app.localizedName ?? "Unbekannt")")
+            self?.eventManager.detachApp(app)
+        }
+    }
 }
 
 extension PaneKitEventManager {
