@@ -114,7 +114,6 @@ extension PaneKitEventManager {
             print("🆕 App gestartet: \(app.localizedName ?? "Unbekannt")")
             self.attachToApp(app)
             
-            // Lazy-Recovery triggern, falls AX-Anbindung verloren ging
             PaneKitManager.shared.scheduleRecoveryIfNeeded()
         }
         
@@ -125,37 +124,11 @@ extension PaneKitEventManager {
             print("❌ App geschlossen: \(app.localizedName ?? "Unbekannt")")
             self.detachApp(app)
             
-            // Falls alle Apps weg sind: Recovery vorbereiten
             if self.observers.isEmpty {
                 print("⚠️ Keine aktiven AXObserver mehr – Recovery geplant.")
                 PaneKitManager.shared.scheduleRecoveryIfNeeded()
             }
         }
-    }
-    
-    func scheduleRecoveryIfNeeded() {
-        guard recoveryTimer == nil else { return }
-        
-        recoveryTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.recoverIfNeeded()
-            }
-        }
-        
-        print("🩺 Recovery-Timer aktiviert (alle 20s).")
-    }
-    
-    public func recoverIfNeeded() {
-        if !self.isHealthy {
-            print("⚠️ EventManager inaktiv – versuche Neuverbindung...")
-            self.stop()
-            self.start()
-        }
-    }
-    
-    public func stopRecoveryTimer() {
-        recoveryTimer?.invalidate()
-        recoveryTimer = nil
     }
 }
 
