@@ -9,6 +9,7 @@ final class PaneKitEventManager {
     private(set) var isRunning = false
     private var observers: [pid_t: AXObserver] = [:]
     private var lastEventTimestamp: Date = .now
+    private var recoveryTimer: Timer?
     
     private init() {}
     
