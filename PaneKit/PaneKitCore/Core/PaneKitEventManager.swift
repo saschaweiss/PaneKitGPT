@@ -88,6 +88,15 @@ extension PaneKitEventManager {
             AXObserverAddNotification(observer, axApp, note as CFString, nil)
         }
         
+        if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &windowList) == .success,
+           let windows = windowList as? [AXUIElement] {
+            for win in windows {
+                for note in notifications {
+                    AXObserverAddNotification(observer, win, note as CFString, nil)
+                }
+            }
+        }
+        
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
     }
     
@@ -170,16 +179,13 @@ extension PaneKitEventManager {
                 let newFrame = window.frame
                 let oldFrame = lastKnownFrames[stableID] ?? .zero
 
-                // Wenn sich der Frame wirklich ändert
                 if !newFrame.equalTo(oldFrame) {
                     lastKnownFrames[stableID] = newFrame
 
-                    // Wenn Maus gedrückt → nur merken, nicht loggen
                     if NSEvent.pressedMouseButtons != 0 {
                         Self.pendingWindowChanges[stableID] = (newFrame, screen, Date())
                         isDragging = true
                     } else {
-                        // Nur EINMAL loggen, wenn Drag vorbei
                         if isDragging {
                             isDragging = false
                             if let (frame, screen, _) = Self.pendingWindowChanges[stableID] {
