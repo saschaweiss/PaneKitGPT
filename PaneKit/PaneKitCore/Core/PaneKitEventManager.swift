@@ -31,6 +31,7 @@ final class PaneKitEventManager {
         }
         observers.removeAll()
         isRunning = false
+        print("🛑 PaneKitEventManager gestoppt")
     }
 }
 
