@@ -93,7 +93,7 @@ public final class PaneKitManager: Sendable {
     public func stop() {
         eventManager.stop()
         cache.clear()
-        eventManager.stopRecoveryTimer()
+        stopRecoveryTimer()
         isRunning = false
         print("🛑 PaneKitManager gestoppt.")
     }
@@ -101,5 +101,30 @@ public final class PaneKitManager: Sendable {
     public func refresh() async {
         await start(with: config)
         print("🔄 PaneKitManager: Fenster & Tabs neu gesammelt.")
+    }
+    
+    func scheduleRecoveryIfNeeded() {
+        guard recoveryTimer == nil else { return }
+        
+        recoveryTimer = Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.recoverIfNeeded()
+            }
+        }
+        
+        print("🩺 Recovery-Timer aktiviert (alle 20s).")
+    }
+    
+    public func recoverIfNeeded() {
+        if !self.isHealthy {
+            print("⚠️ EventManager inaktiv – versuche Neuverbindung...")
+            self.stop()
+            self.start()
+        }
+    }
+    
+    public func stopRecoveryTimer() {
+        recoveryTimer?.invalidate()
+        recoveryTimer = nil
     }
 }
