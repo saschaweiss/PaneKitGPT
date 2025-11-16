@@ -184,25 +184,26 @@ extension PaneKitEventManager {
             case .focusChanged(let stableID):
                 updateFocus(for: stableID)
                 
-        case .windowMoved(let stableID, let frame, let screen),
-             .windowResized(let stableID, let frame, let screen):
-            Self.pendingWindowChanges[stableID] = (frame, screen, Date())
-            debounceMoveResizeEvents()
+            case .windowMoved(let stableID, let frame, let screen),
+                 .windowResized(let stableID, let frame, let screen):
+                Self.pendingWindowChanges[stableID] = (frame, screen, Date())
+                debounceMoveResizeEvents()
         }
     }
     
     private func debounceMoveResizeEvents() {
         Self.debounceTimer?.invalidate()
-        
+
         Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: Self.moveResizeDebounceInterval, repeats: false) { [weak self] _ in
             guard let self = self else { return }
-            
+
             let now = Date()
             for (stableID, change) in Self.pendingWindowChanges {
-                // Nur anwenden, wenn seit letztem Update genügend Zeit vergangen ist
                 if now.timeIntervalSince(change.lastUpdate) >= Self.moveResizeDebounceInterval {
-                    self.updateWindowPosition(stableID: stableID, frame: change.frame, screen: change.screen)
-                    Self.pendingWindowChanges.removeValue(forKey: stableID)
+                    if NSEvent.pressedMouseButtons == 0 {
+                        self.updateWindowPosition(stableID: stableID, frame: change.frame, screen: change.screen)
+                        Self.pendingWindowChanges.removeValue(forKey: stableID)
+                    }
                 }
             }
         }
