@@ -86,5 +86,7 @@ public final class PaneKitManager: Sendable {
                 }
             }
         }
+        
+        print("✅ PaneKitManager gestartet – Cache, EventManager & Kollektoren aktiv.")
     }
 }
