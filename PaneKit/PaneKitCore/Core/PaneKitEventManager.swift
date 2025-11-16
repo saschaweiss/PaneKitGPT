@@ -50,6 +50,20 @@ final class PaneKitEventManager {
         let delta = Date().timeIntervalSince(lastEventTimestamp)
         return isRunning && !observers.isEmpty && delta < timeout
     }
+    
+    private func refreshWindows(for app: NSRunningApplication) {
+        let axApp = AXUIElementCreateApplication(app.processIdentifier)
+        var rawWindows: CFTypeRef?
+        if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &rawWindows) == .success,
+           let windowArray = rawWindows as? [Any],
+           let windows = windowArray as? [AXUIElement],
+           let observer = observers[app.processIdentifier] {
+            for win in windows {
+                AXObserverAddNotification(observer, win, kAXMovedNotification as CFString, nil)
+                AXObserverAddNotification(observer, win, kAXResizedNotification as CFString, nil)
+            }
+        }
+    }
 }
 
 extension PaneKitEventManager {
