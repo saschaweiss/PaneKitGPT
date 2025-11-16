@@ -218,6 +218,7 @@ extension PaneKitEventManager {
                 updateWindowPosition(stableID: stableID, frame: finalFrame, screen: finalScreen)
             }
             Self.pendingWindowChanges.removeAll()
+            Self.debounceTimer?.invalidate()
         }
     }
     
@@ -234,8 +235,14 @@ extension PaneKitEventManager {
     @MainActor
     private func debounceFlushPendingChanges() {
         Self.debounceTimer?.invalidate()
-        Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
-            self?.flushPendingWindowChanges()
+        Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
+            guard let self else { return }
+
+            // Wenn Maus noch gedrückt, keine Updates ausführen!
+            if NSEvent.pressedMouseButtons != 0 { return }
+
+            // Nur den letzten Zustand wirklich übernehmen
+            self.flushPendingWindowChanges()
         }
     }
 }
