@@ -138,22 +138,18 @@ extension PaneKitEventManager {
     
     func handleEvent(_ event: PaneKitEvent) {
         switch event {
-        case .windowCreated(let window), .tabCreated(let window):
-            print(window.appName)
-            PaneKitCache.shared.store(window)
-            
-        case .windowClosed(let stableID), .tabClosed(let stableID):
-            print(stableID)
-            PaneKitCache.shared.remove(stableID)
-            
-        case .focusChanged(let stableID):
-            updateFocus(for: stableID)
-            
-        case .windowMoved(let stableID, let frame, let screen):
-            updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
-            
-        case .windowResized(let stableID, let frame, let screen):
-            updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
+            case .windowCreated(let window), .tabCreated(let window):
+                PaneKitCache.shared.store(window)
+                
+            case .windowClosed(let stableID), .tabClosed(let stableID):
+                PaneKitCache.shared.remove(stableID)
+                
+            case .focusChanged(let stableID):
+                updateFocus(for: stableID)
+                
+            case .windowMoved(let stableID, let frame, let screen),
+                 .windowResized(let stableID, let frame, let screen):
+                updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
         }
     }
 }
