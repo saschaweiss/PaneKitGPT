@@ -10,6 +10,9 @@ final class PaneKitEventManager {
     private var observers: [pid_t: AXObserver] = [:]
     private var lastEventTimestamp: Date = .now
     
+    private var isDragging: Bool = false
+    private var lastStableID: String?
+    
     private init() {}
     
     func start() {
