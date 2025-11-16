@@ -189,15 +189,11 @@ extension PaneKitEventManager {
             guard let screen = window.screen else { return }
             let newFrame = window.frame
             let oldFrame = lastKnownFrames[stableID] ?? .zero
-            
-            print("moveResizeWorkItems 0")
 
             guard !newFrame.equalTo(oldFrame) else { return }
 
             let moved = abs(newFrame.origin.x - oldFrame.origin.x) > 1 || abs(newFrame.origin.y - oldFrame.origin.y) > 1
             let resized = abs(newFrame.size.width - oldFrame.size.width) > 1 || abs(newFrame.size.height - oldFrame.size.height) > 1
-
-            print("moveResizeWorkItems 1")
             
             lastKnownFrames[stableID] = newFrame
             moveResizeWorkItems[stableID]?.cancel()
@@ -212,8 +208,6 @@ extension PaneKitEventManager {
                     }
                 }
             }
-            
-            print("moveResizeWorkItems 2")
 
             moveResizeWorkItems[stableID] = workItem
             DispatchQueue.main.asyncAfter(deadline: .now() + moveResizeDelay, execute: workItem)
