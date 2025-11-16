@@ -92,7 +92,7 @@ extension PaneKitEventManager {
         }
     }
     
-    private func detachApp(_ app: NSRunningApplication) {
+    func detachApp(_ app: NSRunningApplication) {
         guard let observer = observers.removeValue(forKey: app.processIdentifier) else { return }
         CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
     }
