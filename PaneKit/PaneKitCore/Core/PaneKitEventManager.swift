@@ -39,6 +39,7 @@ extension PaneKitEventManager {
         let callback: AXObserverCallback = { observer, element, notification, refcon in
             guard let notification = notification as? String else { return }
             Task { @MainActor in
+                print(element.windowID())
                 PaneKitEventManager.shared.handleAXNotification(notification, element: element)
             }
         }
