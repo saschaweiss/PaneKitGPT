@@ -163,7 +163,7 @@ extension PaneKitEventManager {
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
         let stableID = window.stableID
 
-        if isDragging && (name == kAXMovedNotification || name == kAXResizedNotification) {
+        if isDragging && (name == AXNotify.moved.raw || name == AXNotify.resized.raw) {
             if let screen = window.screen {
                 Self.pendingWindowChanges[stableID] = (window.frame, screen, Date())
             }
