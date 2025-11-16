@@ -135,39 +135,6 @@ extension PaneKitEventManager {
                 break
         }
     }
-    
-    private func handleAXNotification(_ name: String, element: AXUIElement) {
-        switch name {
-        case AXNotify.focusedWindowChanged.string:
-            if let window = PaneKitWindow.fromAXElement(element) {
-                PaneKitCache.shared.store(window)
-                handleEvent(.focusChanged(stableID: window.stableID))
-            }
-            
-        case AXNotify.moved.string:
-            if let window = PaneKitWindow.fromAXElement(element) {
-                handleEvent(.windowMoved(stableID: window.stableID, frame: window.frame, screen: window.screen ?? NSScreen.main!))
-            }
-            
-        case AXNotify.resized.string:
-            if let window = PaneKitWindow.fromAXElement(element) {
-                handleEvent(.windowResized(stableID: window.stableID, frame: window.frame, screen: window.screen ?? NSScreen.main!))
-            }
-            
-        case AXNotify.created.string:
-            if let window = PaneKitWindow.fromAXElement(element) {
-                handleEvent(.windowCreated(window))
-            }
-            
-        case AXNotify.uiElementDestroyed.string:
-            if let window = PaneKitWindow.fromAXElement(element) {
-                handleEvent(.windowClosed(stableID: window.stableID))
-            }
-            
-        default:
-            break
-        }
-    }
 }
 
 extension PaneKitEventManager {
