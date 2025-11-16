@@ -143,6 +143,11 @@ extension PaneKitEventManager {
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
         
+        guard let window = PaneKitWindow.fromAXElement(element) else { return }
+        if suppressedStableIDs.contains(window.stableID) {
+            return
+        }
+        
         switch name {
             case kAXFocusedWindowChangedNotification:
                 if let window = PaneKitWindow.fromAXElement(element) {
