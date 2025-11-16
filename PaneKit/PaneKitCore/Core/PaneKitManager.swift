@@ -76,11 +76,11 @@ public final class PaneKitManager: Sendable {
                         for window in realWindows {
                             let tabs = await PaneKitCollector.collectTabs(for: window)
                             for tab in tabs {
+                                await cache.store(tab)
                                 if await self.config.enableLogging {
-                                    await self.cache.store(tab)
                                     print("📑 Added tab \(await window.appName) -> '\(await tab.title)'")
                                 }
-                            } 
+                            }
                         }
                     }
                 }
