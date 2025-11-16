@@ -132,6 +132,10 @@ extension PaneKitEventManager {
 }
 
 extension PaneKitEventManager {
+    private static let moveResizeDebounceInterval: TimeInterval = 0.25
+    private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen, lastUpdate: Date)] = [:]
+    private static var debounceTimer: Timer?
+    
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
         
