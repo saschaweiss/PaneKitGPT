@@ -12,6 +12,7 @@ final class PaneKitEventManager {
     
     private var isDragging: Bool = false
     private var lastStableID: String?
+    private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen)] = [:]
     
     private init() {}
     
@@ -140,10 +141,6 @@ extension PaneKitEventManager {
     private static var debounceTimer: Timer?
     private static var suppressedStableIDs: [String: Date] = [:]
     
-    private var isDragging: Bool = false
-    private var lastDraggedStableID: String?
-    private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen)] = [:]
-    
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
 
@@ -217,9 +214,10 @@ extension PaneKitEventManager {
 
         if isDragging {
             isDragging = false
-            flushPendingWindowChanges()
-        } else {
-            debounceFlushPendingChanges()
+            if let (finalFrame, finalScreen) = Self.pendingWindowChanges[stableID] {
+                updateWindowPosition(stableID: stableID, frame: finalFrame, screen: finalScreen)
+            }
+            Self.pendingWindowChanges.removeAll()
         }
     }
     
