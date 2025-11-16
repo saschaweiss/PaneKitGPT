@@ -201,10 +201,10 @@ extension PaneKitEventManager {
                     }
                 }
 
-            case kAXCreatedNotification:
+            case AXNotify.created.string:
                 handleEvent(.windowCreated(window))
 
-            case kAXUIElementDestroyedNotification:
+            case AXNotify.uiElementDestroyed.string:
                 handleEvent(.windowClosed(stableID: stableID))
                 
             default:
