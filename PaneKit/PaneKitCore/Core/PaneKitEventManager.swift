@@ -246,7 +246,7 @@ extension PaneKitEventManager {
     private func updateWindowPosition(stableID: String, frame: CGRect, screen: NSScreen) {
         print("updateWindowPosition (executing once per completed drag)")
 
-        PaneKitEventManager.suppressedStableIDs.insert(stableID)
+        Self.suppressedStableIDs[stableID] = Date()
         
         defer {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
