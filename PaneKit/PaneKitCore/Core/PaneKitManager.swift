@@ -76,7 +76,7 @@ public final class PaneKitManager: Sendable {
                         for window in realWindows {
                             let tabs = await PaneKitCollector.collectTabs(for: window)
                             for tab in tabs {
-                                await cache.store(tab)
+                                await self.cache.store(tab)
                                 if await self.config.enableLogging {
                                     print("📑 Added tab \(await window.appName) -> '\(await tab.title)'")
                                 }
@@ -93,7 +93,7 @@ public final class PaneKitManager: Sendable {
     public func stop() {
         eventManager.stop()
         cache.clear()
-        PaneKitEventManager.stopRecoveryTimer()
+        eventManager.stopRecoveryTimer()
         isRunning = false
         print("🛑 PaneKitManager gestoppt.")
     }
