@@ -430,13 +430,12 @@ extension PaneKitWindow {
     public var screenName: String { screen?.localizedName ?? "Unknown screen" }
     
     static func fromAXElement(_ element: AXUIElement) -> PaneKitWindow? {
-        // Direkt initialisieren – PKWindow(axElement:) gibt ein Non-Optional zurück
         let pkWindow = PKWindow(axElement: element)
+        
+        guard let window = PaneKitWindow(pkWindow: pkWindow) else {
+            return nil
+        }
 
-        // Swift-Wrapper erzeugen
-        let window = PaneKitWindow(pkWindow: pkWindow)
-
-        // Rolle abfragen
         if let role = copyAXValue(for: AXAttr.role.raw, of: element) as? String {
             switch role {
             case kAXTabGroupRole as String, "AXTab", "AXSheet":
