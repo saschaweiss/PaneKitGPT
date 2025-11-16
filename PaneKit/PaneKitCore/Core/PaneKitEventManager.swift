@@ -212,30 +212,28 @@ extension PaneKitEventManager {
                     let dw = abs(newFrame.size.width  - oldFrame.size.width)
                     let dh = abs(newFrame.size.height - oldFrame.size.height)
 
-                    let posDelta = dx + dy
-                    let sizeDelta = dw + dh
+                    let posChanged = dx > 1 || dy > 1
+                    let sizeChanged = dw > 1 || dh > 1
 
-                    let movedDominant   = posDelta > 1 && sizeDelta < posDelta * 0.1
-                    let resizedDominant = sizeDelta > 1 && posDelta < sizeDelta * 0.1
-                    let bothChanged     = !movedDominant && !resizedDominant && (posDelta > 1 || sizeDelta > 1)
+                    // Verlaufspuffer aktualisieren
+                    var sizes = resizeSamples[stableID, default: []]
+                    var points = moveSamples[stableID, default: []]
+                    if sizes.count > 3 { sizes.removeFirst() }
+                    if points.count > 3 { points.removeFirst() }
+                    sizes.append(newFrame.size)
+                    points.append(newFrame.origin)
+                    resizeSamples[stableID] = sizes
+                    moveSamples[stableID] = points
 
-                    if movedDominant {
-                        print("🟦 moved → dominante Positionsänderung (\(dx),\(dy))")
-                        self.handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
-                    } else if resizedDominant {
-                        print("🟩 resized → dominante Größenänderung (\(dw),\(dh))")
-                        let now = Date()
-                        self.lastResizeTimestamps[stableID] = now
+                    // Stabilität: nur melden, wenn sich 3 Messungen in Folge auf derselben Seite unterscheiden
+                    let movedStable = posChanged && !sizeChanged && Set(points.map { $0 }).count > 1 && Set(sizes.map { $0 }).count == 1
+                    let resizedStable = sizeChanged && !posChanged && Set(sizes.map { $0 }).count > 1 && Set(points.map { $0 }).count == 1
 
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                            guard let self else { return }
-                            if let last = self.lastResizeTimestamps[stableID], Date().timeIntervalSince(last) >= 0.1 {
-                                self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
-                            }
-                        }
-                    } else if bothChanged {
-                        print("🟨 move+resize → beides (\(dx),\(dy),\(dw),\(dh))")
+                    if resizedStable {
+                        print("🟩 resize erkannt (stabile Größenänderung)")
                         self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
+                    } else if movedStable {
+                        print("🟦 move erkannt (stabile Positionsänderung)")
                         self.handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
                     }
                 }
