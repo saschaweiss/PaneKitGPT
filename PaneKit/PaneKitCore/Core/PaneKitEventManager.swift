@@ -158,21 +158,21 @@ extension PaneKitEventManager {
         }
         
         switch name {
-        case kAXFocusedWindowChangedNotification:
-            PaneKitCache.shared.store(window)
-            handleEvent(.focusChanged(stableID: stableID))
+            case kAXFocusedWindowChangedNotification:
+                PaneKitCache.shared.store(window)
+                handleEvent(.focusChanged(stableID: stableID))
 
-        case kAXMovedNotification, kAXResizedNotification:
-            // Nur wenn kein aktiver Drag
-            if !isDragging, let screen = window.screen {
-                handleEvent(.windowMoved(stableID: stableID, frame: window.frame, screen: screen))
-            }
+            case kAXMovedNotification, kAXResizedNotification:
+                // Nur wenn kein aktiver Drag
+                if !isDragging, let screen = window.screen {
+                    handleEvent(.windowMoved(stableID: stableID, frame: window.frame, screen: screen))
+                }
 
-        case kAXCreatedNotification:
-            handleEvent(.windowCreated(window))
+            case kAXCreatedNotification:
+                handleEvent(.windowCreated(window))
 
-        case kAXUIElementDestroyedNotification:
-            handleEvent(.windowClosed(stableID: stableID))
+            case kAXUIElementDestroyedNotification:
+                handleEvent(.windowClosed(stableID: stableID))
                 
             default:
                 break
