@@ -203,10 +203,10 @@ extension PaneKitEventManager {
 
             case AXNotify.created.string:
                 handleEvent(.windowCreated(window))
-            if let observer = observers[window.pid] {
-                AXObserverAddNotification(observer, window.element, kAXMovedNotification as CFString, nil)
-                AXObserverAddNotification(observer, window.element, kAXResizedNotification as CFString, nil)
-            }
+                if let observer = observers[window.pid] {
+                    AXObserverAddNotification(observer, window.element, AXNotify.moved.string, nil)
+                    AXObserverAddNotification(observer, window.element, AXNotify.resized.string, nil)
+                }
 
             case AXNotify.uiElementDestroyed.string:
                 handleEvent(.windowClosed(stableID: stableID))
