@@ -144,7 +144,7 @@ extension PaneKitEventManager {
         lastEventTimestamp = .now
         
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
-        if suppressedStableIDs.contains(window.stableID) {
+        if PaneKitEventManager.suppressedStableIDs.contains(window.stableID) {
             return
         }
         
@@ -248,7 +248,7 @@ extension PaneKitEventManager {
         
         defer {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.suppressedStableIDs.remove(stableID)
+                PaneKitEventManager.suppressedStableIDs.remove(stableID)
             }
         }
         
