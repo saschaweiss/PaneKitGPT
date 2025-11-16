@@ -78,7 +78,9 @@ extension PaneKitEventManager {
             AXNotify.resized.string,
             AXNotify.focusedWindowChanged.string,
             AXNotify.created.string,
-            AXNotify.uiElementDestroyed.string
+            AXNotify.uiElementDestroyed.string,
+            AXNotify.windowMiniaturized.string,
+            AXNotify.windowDeminiaturized.string
         ]
         
         for note in notifications {
