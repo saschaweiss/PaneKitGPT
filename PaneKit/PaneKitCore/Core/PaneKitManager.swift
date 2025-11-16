@@ -5,15 +5,14 @@ import ApplicationServices
 @MainActor
 public final class PaneKitManager: Sendable {
     public static let shared = PaneKitManager()
-
-    public private(set) var config: PaneKitConfiguration
-    public let collector = PaneKitCollector.shared
+    
+    private var isRunning = false
+    private var recoveryTimer: Timer?
+    private let eventManager = PaneKitEventManager.shared
+    private(set) var config = PaneKitConfiguration.default
     private let cache = PaneKitCache.shared
-    public private(set) var isRunning = false
-
-    private init() {
-        self.config = PaneKitConfiguration()
-    }
+    
+    private init() {}
 
     public func start(with configuration: PaneKitConfiguration? = nil, includingTabs: Bool = false) async {
         if let cfg = configuration {
