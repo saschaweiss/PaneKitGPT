@@ -198,14 +198,13 @@ extension PaneKitEventManager {
     
     @MainActor
     private func debounceMoveResizeEvents() {
-
         if NSEvent.pressedMouseButtons != 0 {
-            DragState.isDragging = true
+            isDragging = true
             return
         }
 
-        if DragState.isDragging {
-            DragState.isDragging = false
+        if isDragging {
+            isDragging = false
 
             let changes = Self.pendingWindowChanges
             Self.pendingWindowChanges.removeAll()
