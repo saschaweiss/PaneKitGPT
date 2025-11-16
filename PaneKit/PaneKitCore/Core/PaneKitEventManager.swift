@@ -103,13 +103,13 @@ extension PaneKitEventManager {
         nc.addObserver(forName: NSWorkspace.didLaunchApplicationNotification, object: nil, queue: .main) { [weak self] notif in
             guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
             print("🆕 App gestartet: \(app.localizedName ?? "Unbekannt")")
-            self?.eventManager.attachToApp(app)
+            attachToApp(app)
         }
         
         nc.addObserver(forName: NSWorkspace.didTerminateApplicationNotification, object: nil, queue: .main) { [weak self] notif in
             guard let app = notif.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
             print("❌ App geschlossen: \(app.localizedName ?? "Unbekannt")")
-            self?.eventManager.detachApp(app)
+            detachApp(app)
         }
     }
 }
