@@ -14,6 +14,7 @@ final class PaneKitEventManager {
     private var lastStableID: String?
     private var lastDraggedStableID: String?
     private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen)] = [:]
+    private static let moveResizeDebounceInterval: TimeInterval = 0.25
     
     private init() {}
     
