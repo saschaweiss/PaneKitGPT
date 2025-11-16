@@ -189,8 +189,7 @@ extension PaneKitEventManager {
                 
             case .windowMoved(let stableID, let frame, let screen),
                  .windowResized(let stableID, let frame, let screen):
-                Self.pendingWindowChanges[stableID] = (frame, screen, Date())
-                debounceMoveResizeEvents()
+                handleMoveOrResize(stableID: stableID, frame: frame, screen: screen)
         }
     }
     
@@ -231,6 +230,24 @@ extension PaneKitEventManager {
             flushPendingWindowChanges()
         } else {
             debounceFlushPendingChanges()
+        }
+    }
+    
+    @MainActor
+    private func flushPendingWindowChanges() {
+        let changes = Self.pendingWindowChanges
+        Self.pendingWindowChanges.removeAll()
+
+        for (stableID, change) in changes {
+            updateWindowPosition(stableID: stableID, frame: change.frame, screen: change.screen)
+        }
+    }
+
+    @MainActor
+    private func debounceFlushPendingChanges() {
+        Self.debounceTimer?.invalidate()
+        Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            self?.flushPendingWindowChanges()
         }
     }
 }
