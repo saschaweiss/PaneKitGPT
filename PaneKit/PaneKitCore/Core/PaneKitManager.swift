@@ -94,7 +94,6 @@ public final class PaneKitManager: Sendable {
         eventManager.stop()
         cache.clear()
         PaneKitEventManager.stopRecoveryTimer()
-        PaneKitEventManager.
         isRunning = false
         print("🛑 PaneKitManager gestoppt.")
     }
