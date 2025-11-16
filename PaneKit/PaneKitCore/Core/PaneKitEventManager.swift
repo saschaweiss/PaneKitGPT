@@ -16,6 +16,7 @@ final class PaneKitEventManager {
     private var lastFrameDuringDrag: CGRect?
     private var lastScreenDuringDrag: NSScreen?
     private var lastKnownFrames: [String: CGRect] = [:]
+    private var lastResizeTimestamps: [String: Date] = [:]
     private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen, lastUpdate: Date)] = [:]
     private static let moveResizeDebounceInterval: TimeInterval = 0.25
     private var moveResizeWorkItems: [String: DispatchWorkItem] = [:]
