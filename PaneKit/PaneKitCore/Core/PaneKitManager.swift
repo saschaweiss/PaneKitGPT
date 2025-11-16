@@ -18,6 +18,8 @@ public final class PaneKitManager: Sendable {
         if let cfg = configuration {
             self.config = cfg
         }
+        
+        print("star")
 
         guard !isRunning else { return }
         isRunning = true
@@ -116,7 +118,7 @@ public final class PaneKitManager: Sendable {
     }
     
     public func recoverIfNeeded() {
-        if !self.isHealthy {
+        if !eventManager.isHealthy {
             print("⚠️ EventManager inaktiv – versuche Neuverbindung...")
             eventManager.stop()
             eventManager.start()
