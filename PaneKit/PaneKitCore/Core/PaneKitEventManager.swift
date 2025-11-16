@@ -22,13 +22,11 @@ final class PaneKitEventManager {
         guard !isRunning else { return }
         isRunning = true
         observers.removeAll()
-
-        setupGlobalMouseTracking()
-
-        for app in NSWorkspace.shared.runningApplications where app.isFinishedLaunching && app.isActive {
+        
+        for app in NSWorkspace.shared.runningApplications where app.isFinishedLaunching {
             attachToApp(app)
         }
-
+        
         setupWorkspaceObservers()
         print("👂 PaneKitEventManager gestartet")
     }
