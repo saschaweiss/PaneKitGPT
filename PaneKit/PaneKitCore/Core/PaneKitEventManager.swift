@@ -85,13 +85,13 @@ extension PaneKitEventManager {
 extension PaneKitEventManager {
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         switch name {
-        case kAXFocusedWindowChangedNotification:
+        case AXNotify.focusedWindowChanged.string:
             if let window = PaneKitWindow.fromAXElement(element) {
                 PaneKitCache.shared.store(window)
                 handleEvent(.focusChanged(stableID: window.stableID))
             }
             
-        case kAXMovedNotification:
+        case AXNotify.moved:
             if let window = PaneKitWindow.fromAXElement(element) {
                 handleEvent(.windowMoved(stableID: window.stableID, frame: window.frame, screen: window.screen))
             }
