@@ -184,11 +184,10 @@ extension PaneKitEventManager {
             case .focusChanged(let stableID):
                 updateFocus(for: stableID)
                 
-            case .windowMoved(let stableID, let frame, let screen),
-                 .windowResized(let stableID, let frame, let screen):
-            if NSEvent.pressedMouseButtons == 0 {
-                self.updateWindowPosition(stableID: stableID, frame: change.frame, screen: change.screen)
-            }
+        case .windowMoved(let stableID, let frame, let screen),
+             .windowResized(let stableID, let frame, let screen):
+            Self.pendingWindowChanges[stableID] = (frame, screen, Date())
+            debounceMoveResizeEvents()
         }
     }
     
