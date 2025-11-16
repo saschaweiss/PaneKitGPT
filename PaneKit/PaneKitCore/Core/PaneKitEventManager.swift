@@ -222,6 +222,7 @@ extension PaneKitEventManager {
         NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { _ in
             self.isDragging = true
         }
+        
         NSEvent.addGlobalMonitorForEvents(matching: .leftMouseUp) { _ in
             Task { @MainActor in
                 self.isDragging = false
