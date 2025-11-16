@@ -33,17 +33,22 @@ final class PaneKitEventManager {
         isRunning = false
         print("🛑 PaneKitEventManager gestoppt")
     }
+    
+    var isHealthy: Bool {
+        let timeout: TimeInterval = 30
+        let delta = Date().timeIntervalSince(lastEventTimestamp)
+        return isRunning && !observers.isEmpty && delta < timeout
+    }
 }
 
 extension PaneKitEventManager {
     private func attachToApp(_ app: NSRunningApplication) {
-        guard let axApp = AXUIElementCreateApplication(app.processIdentifier) as AXUIElement? else { return }
+        let axApp = AXUIElementCreateApplication(app.processIdentifier)
         var observer: AXObserver?
         
-        let callback: AXObserverCallback = { observer, element, notification, refcon in
+        let callback: AXObserverCallback = { _, element, notification, _ in
             guard let notification = notification as? String else { return }
             Task { @MainActor in
-                print(element.windowID())
                 PaneKitEventManager.shared.handleAXNotification(notification, element: element)
             }
         }
