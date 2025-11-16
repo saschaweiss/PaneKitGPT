@@ -89,4 +89,17 @@ public final class PaneKitManager: Sendable {
         
         print("✅ PaneKitManager gestartet – Cache, EventManager & Kollektoren aktiv.")
     }
+    
+    public func stop() {
+        eventManager.stop()
+        cache.clear()
+        stopRecoveryTimer()
+        isRunning = false
+        print("🛑 PaneKitManager gestoppt.")
+    }
+    
+    public func refresh() async {
+        await start(with: config)
+        print("🔄 PaneKitManager: Fenster & Tabs neu gesammelt.")
+    }
 }
