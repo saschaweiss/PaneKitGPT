@@ -78,11 +78,9 @@ extension PaneKitEventManager {
         let axApp = AXUIElementCreateApplication(app.processIdentifier)
         var observer: AXObserver?
         
-        let callback: AXObserverCallback = { _, element, notification, _ in
+        let callback: AXObserverCallback = { observer, element, notification, _ in
             guard let notification = notification as? String else { return }
-            Task { @MainActor in
-                PaneKitEventManager.shared.handleAXNotification(notification, element: element)
-            }
+            PaneKitEventManager.shared.enqueueAXEvent(name: notification, element: element)
         }
         
         let result = AXObserverCreate(app.processIdentifier, callback, &observer)
@@ -225,7 +223,6 @@ extension PaneKitEventManager {
                     resizeSamples[stableID] = sizes
                     moveSamples[stableID] = points
 
-                    // Stabilität: nur melden, wenn sich 3 Messungen in Folge auf derselben Seite unterscheiden
                     let movedStable = posChanged && !sizeChanged && Set(points.map { $0 }).count > 1 && Set(sizes.map { $0 }).count == 1
                     let resizedStable = sizeChanged && !posChanged && Set(sizes.map { $0 }).count > 1 && Set(points.map { $0 }).count == 1
 
