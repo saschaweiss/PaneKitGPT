@@ -165,11 +165,22 @@ extension PaneKitEventManager {
                 PaneKitCache.shared.store(window)
                 handleEvent(.focusChanged(stableID: stableID))
 
-            case kAXMovedNotification, kAXResizedNotification:
-                // Nur wenn kein aktiver Drag
-                if !isDragging, let screen = window.screen {
-                    handleEvent(.windowMoved(stableID: stableID, frame: window.frame, screen: screen))
+        case kAXMovedNotification, kAXResizedNotification:
+            if let screen = window.screen {
+                let newFrame = window.frame
+                let oldFrame = lastKnownFrames[stableID] ?? .zero
+
+                // Prüfen, ob sich die Position oder Größe tatsächlich verändert hat
+                if abs(newFrame.origin.x - oldFrame.origin.x) > 1 ||
+                   abs(newFrame.origin.y - oldFrame.origin.y) > 1 ||
+                   abs(newFrame.size.width - oldFrame.size.width) > 1 ||
+                   abs(newFrame.size.height - oldFrame.size.height) > 1 {
+
+                    // Aktualisieren und Event senden
+                    lastKnownFrames[stableID] = newFrame
+                    handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
                 }
+            }
 
             case kAXCreatedNotification:
                 handleEvent(.windowCreated(window))
