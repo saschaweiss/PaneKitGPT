@@ -40,6 +40,47 @@ final class PaneKitEventManager {
         print("🛑 PaneKitEventManager gestoppt")
     }
     
+    private func attachToApp(_ app: NSRunningApplication) {
+        let axApp = AXUIElementCreateApplication(app.processIdentifier)
+        var observer: AXObserver?
+        
+        let callback: AXObserverCallback = { _, element, notification, _ in
+            guard let notification = notification as? String else { return }
+            PaneKitEventManager.shared.enqueueAXEvent(name: notification, element: element)
+        }
+        
+        let result = AXObserverCreate(app.processIdentifier, callback, &observer)
+        guard result == .success, let observer else { return }
+        
+        observers[app.processIdentifier] = observer
+        
+        let notifications = [
+            AXNotify.moved.string,
+            AXNotify.resized.string,
+            AXNotify.focusedWindowChanged.string,
+            AXNotify.created.string,
+            AXNotify.uiElementDestroyed.string
+        ]
+        
+        for note in notifications {
+            AXObserverAddNotification(observer, axApp, note as CFString, nil)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            var value: CFTypeRef?
+            if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &value) == .success,
+               let windows = value as? [AXUIElement] {
+                for win in windows {
+                    AXObserverAddNotification(observer, win, kAXMovedNotification as CFString, nil)
+                    AXObserverAddNotification(observer, win, kAXResizedNotification as CFString, nil)
+                }
+                print("🪟 Beobachte \(windows.count) Fenster in \(app.localizedName ?? "Unbekannt")")
+            }
+        }
+        
+        CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
+    }
+    
     var isHealthy: Bool {
         let timeout: TimeInterval = 30
         let delta = Date().timeIntervalSince(lastEventTimestamp)
