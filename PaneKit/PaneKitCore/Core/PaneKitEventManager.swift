@@ -334,17 +334,20 @@ extension PaneKitEventManager {
     
     private func updateWindowPosition(stableID: String, frame: CGRect, screen: NSScreen) {
         guard let window = PaneKitCache.shared.get(stableID) else { return }
-        
-        if let last = lastKnownFrames[stableID], last.equalTo(frame) {
-            return
-        }
+        if let last = lastKnownFrames[stableID], last.equalTo(frame) { return }
 
         print("updateWindowPosition (executing once per completed drag)")
-        lastKnownFrames[stableID] = frame
 
+        suppressedIDs.insert(stableID)
+
+        lastKnownFrames[stableID] = frame
         window.frame = frame
         window.screen = screen
         window.zIndex = fetchZIndex(for: window)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            self?.suppressedIDs.remove(stableID)
+        }
     }
     
     private func fetchZIndex(for window: PaneKitWindow) -> Int {
