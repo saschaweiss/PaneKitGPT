@@ -186,7 +186,9 @@ extension PaneKitEventManager {
                 
             case .windowMoved(let stableID, let frame, let screen),
                  .windowResized(let stableID, let frame, let screen):
-                updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
+                if NSEvent.pressedMouseButtons == 0 {
+                    self.updateWindowPosition(stableID: stableID, frame: change.frame, screen: change.screen)
+                }
         }
     }
     
