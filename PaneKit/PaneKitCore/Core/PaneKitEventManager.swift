@@ -45,8 +45,8 @@ final class PaneKitEventManager {
         var observer: AXObserver?
         
         let callback: AXObserverCallback = { _, element, notification, _ in
-            guard let notification = notification as? String else { return }
-            PaneKitEventManager.shared.enqueueAXEvent(name: notification, element: element)
+            let notificationName = notification as String
+            PaneKitEventManager.shared.enqueueAXEvent(name: notificationName, element: element)
         }
         
         let result = AXObserverCreate(app.processIdentifier, callback, &observer)
