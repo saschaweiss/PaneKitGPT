@@ -181,7 +181,7 @@ extension PaneKitEventManager {
     
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
-        print("📡 AX-Event empfangen: \(name)")
+
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
         let stableID = window.stableID
 
