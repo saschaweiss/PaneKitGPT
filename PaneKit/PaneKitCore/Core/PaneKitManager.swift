@@ -24,7 +24,7 @@ public final class PaneKitManager: Sendable {
         
         cache.clear()
         eventManager.start()
-        observeWorkspaceEvents()
+        eventManager.observeWorkspaceEvents()
         
         guard let pkApps = Application.runningApplications(), !pkApps.isEmpty else {
             return
