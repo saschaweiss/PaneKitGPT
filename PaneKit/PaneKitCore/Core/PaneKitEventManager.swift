@@ -58,7 +58,7 @@ extension PaneKitEventManager {
         
         guard result == .success, let observer = observer else {
             print("⚠️ AXObserver konnte nicht für \(app.localizedName ?? "Unbekannt") erstellt werden.")
-            PaneKitManager.shared.scheduleRecoveryIfNeeded()
+            scheduleRecoveryIfNeeded()
             return
         }
         
