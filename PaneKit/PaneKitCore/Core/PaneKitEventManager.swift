@@ -91,22 +91,22 @@ extension PaneKitEventManager {
                 handleEvent(.focusChanged(stableID: window.stableID))
             }
             
-        case AXNotify.moved:
+        case AXNotify.moved.string:
             if let window = PaneKitWindow.fromAXElement(element) {
                 handleEvent(.windowMoved(stableID: window.stableID, frame: window.frame, screen: window.screen))
             }
             
-        case kAXResizedNotification:
+        case AXNotify.resized.string:
             if let window = PaneKitWindow.fromAXElement(element) {
                 handleEvent(.windowResized(stableID: window.stableID, frame: window.frame, screen: window.screen))
             }
             
-        case kAXCreatedNotification:
+        case AXNotify.created.string:
             if let window = PaneKitWindow.fromAXElement(element) {
                 handleEvent(.windowCreated(window))
             }
             
-        case kAXUIElementDestroyedNotification:
+        case AXNotify.uiElementDestroyed.string:
             if let window = PaneKitWindow.fromAXElement(element) {
                 handleEvent(.windowClosed(stableID: window.stableID))
             }
