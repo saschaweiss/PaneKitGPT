@@ -185,6 +185,23 @@ extension PaneKitEventManager {
                 updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
         }
     }
+    
+    private func debounceMoveResizeEvents() {
+        Self.debounceTimer?.invalidate()
+        
+        Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: Self.moveResizeDebounceInterval, repeats: false) { [weak self] _ in
+            guard let self = self else { return }
+            
+            let now = Date()
+            for (stableID, change) in Self.pendingWindowChanges {
+                // Nur anwenden, wenn seit letztem Update genügend Zeit vergangen ist
+                if now.timeIntervalSince(change.lastUpdate) >= Self.moveResizeDebounceInterval {
+                    self.updateWindowPosition(stableID: stableID, frame: change.frame, screen: change.screen)
+                    Self.pendingWindowChanges.removeValue(forKey: stableID)
+                }
+            }
+        }
+    }
 }
 
 extension PaneKitEventManager {
