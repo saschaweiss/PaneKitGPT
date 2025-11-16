@@ -194,18 +194,16 @@ extension PaneKitEventManager {
     @MainActor
     private func debounceMoveResizeEvents() {
         Self.debounceTimer?.invalidate()
+        
+        static var isDragging = false
+        isDragging = true
 
-        // Kurz anhalten, um nachlaufende AXEvents zu sammeln
         Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: Self.moveResizeDebounceInterval, repeats: false) { [weak self] _ in
             Task { @MainActor in
                 guard let self = self else { return }
 
-                // Wir kopieren die Änderungen und leeren die Map,
-                // um gleichzeitige Zugriffe zu vermeiden
                 let changes = Self.pendingWindowChanges
                 Self.pendingWindowChanges.removeAll()
-
-                // Maus losgelassen? Nur dann aktualisieren
                 guard NSEvent.pressedMouseButtons == 0 else { return }
 
                 for (stableID, change) in changes {
