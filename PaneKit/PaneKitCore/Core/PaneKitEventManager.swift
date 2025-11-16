@@ -158,31 +158,21 @@ extension PaneKitEventManager {
         }
         
         switch name {
-            case kAXFocusedWindowChangedNotification:
-                if let window = PaneKitWindow.fromAXElement(element) {
-                    PaneKitCache.shared.store(window)
-                    handleEvent(.focusChanged(stableID: window.stableID))
-                }
-                
-            case kAXMovedNotification:
-                if let window = PaneKitWindow.fromAXElement(element), let screen = window.screen {
-                    handleEvent(.windowMoved(stableID: window.stableID, frame: window.frame, screen: screen))
-                }
-                
-            case kAXResizedNotification:
-                if let window = PaneKitWindow.fromAXElement(element), let screen = window.screen {
-                    handleEvent(.windowResized(stableID: window.stableID, frame: window.frame, screen: screen))
-                }
-                
-            case kAXCreatedNotification:
-                if let window = PaneKitWindow.fromAXElement(element) {
-                    handleEvent(.windowCreated(window))
-                }
-                
-            case kAXUIElementDestroyedNotification:
-                if let window = PaneKitWindow.fromAXElement(element) {
-                    handleEvent(.windowClosed(stableID: window.stableID))
-                }
+        case kAXFocusedWindowChangedNotification:
+            PaneKitCache.shared.store(window)
+            handleEvent(.focusChanged(stableID: stableID))
+
+        case kAXMovedNotification, kAXResizedNotification:
+            // Nur wenn kein aktiver Drag
+            if !isDragging, let screen = window.screen {
+                handleEvent(.windowMoved(stableID: stableID, frame: window.frame, screen: screen))
+            }
+
+        case kAXCreatedNotification:
+            handleEvent(.windowCreated(window))
+
+        case kAXUIElementDestroyedNotification:
+            handleEvent(.windowClosed(stableID: stableID))
                 
             default:
                 break
