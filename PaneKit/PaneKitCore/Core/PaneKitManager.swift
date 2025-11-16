@@ -65,8 +65,9 @@ public final class PaneKitManager: Sendable {
                     if !role.contains("window") { return false }
                     
                     cache.store(window)
-                    print("📑 Added window '\(window.title)' for \(window.appName)1234")
-
+                    if config.enableLogging {
+                        print("📑 Added window '\(window.title)' for \(window.appName)")
+                    }
                     return true
                 }
                 
