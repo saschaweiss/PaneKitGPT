@@ -157,16 +157,18 @@ final class PaneKitEventManager {
             return
         }
         
+        print("📬 handleAXNotification: \(name)")
+        
         switch name {
-        case AXNotify.focusedWindowChanged.string:
-            PaneKitCache.shared.store(window)
-            handleEvent(.focusChanged(stableID: stableID))
-        case AXNotify.created.string:
-            handleEvent(.windowCreated(window))
-        case AXNotify.uiElementDestroyed.string:
-            handleEvent(.windowClosed(stableID: stableID))
-        default:
-            break
+            case AXNotify.focusedWindowChanged.string:
+                PaneKitCache.shared.store(window)
+                handleEvent(.focusChanged(stableID: stableID))
+            case AXNotify.created.string:
+                handleEvent(.windowCreated(window))
+            case AXNotify.uiElementDestroyed.string:
+                handleEvent(.windowClosed(stableID: stableID))
+            default:
+                break
         }
     }
     
