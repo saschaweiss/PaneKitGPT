@@ -63,20 +63,19 @@ extension PaneKitEventManager {
         
         observers[app.processIdentifier] = observer
             
-            let notifications = [
-                kAXMovedNotification,
-                kAXResizedNotification,
-                kAXFocusedWindowChangedNotification,
-                kAXCreatedNotification,
-                kAXUIElementDestroyedNotification
-            ]
-            
-            for note in notifications {
-                AXObserverAddNotification(observer, axApp, note as CFString, nil)
-            }
-            
-            CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
+        let notifications = [
+            kAXMovedNotification,
+            kAXResizedNotification,
+            kAXFocusedWindowChangedNotification,
+            kAXCreatedNotification,
+            kAXUIElementDestroyedNotification
+        ]
+        
+        for note in notifications {
+            AXObserverAddNotification(observer, axApp, note as CFString, nil)
         }
+        
+        CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .defaultMode)
     }
     
     private func setupWorkspaceObservers() {
