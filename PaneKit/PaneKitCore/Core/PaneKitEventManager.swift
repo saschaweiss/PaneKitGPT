@@ -179,6 +179,7 @@ extension PaneKitEventManager {
         let stableID = window.stableID
 
         if name == AXNotify.moved.string || name == AXNotify.resized.string {
+            print("move/resize")
             guard let screen = window.screen else { return }
             let newFrame = window.frame
             let oldFrame = lastKnownFrames[stableID] ?? .zero
