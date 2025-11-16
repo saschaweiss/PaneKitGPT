@@ -22,6 +22,10 @@ public final class PaneKitManager: Sendable {
         guard !isRunning else { return }
         isRunning = true
         
+        cache.clear()
+        eventManager.start()
+        observeWorkspaceEvents()
+        
         guard let pkApps = Application.runningApplications(), !pkApps.isEmpty else {
             return
         }
