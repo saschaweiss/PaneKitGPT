@@ -12,6 +12,7 @@ final class PaneKitEventManager {
     
     private var isDragging: Bool = false
     private var lastStableID: String?
+    private var lastDraggedStableID: String?
     private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen)] = [:]
     
     private init() {}
@@ -137,7 +138,6 @@ extension PaneKitEventManager {
 
 extension PaneKitEventManager {
     private static let moveResizeDebounceInterval: TimeInterval = 0.25
-    private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen, lastUpdate: Date)] = [:]
     private static var debounceTimer: Timer?
     private static var suppressedStableIDs: [String: Date] = [:]
     
