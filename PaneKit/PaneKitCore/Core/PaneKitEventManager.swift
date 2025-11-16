@@ -201,11 +201,25 @@ extension PaneKitEventManager {
             let workItem = DispatchWorkItem { [weak self] in
                 guard let self else { return }
                 Task { @MainActor in
-                    if resized {
-                        print(": resized")
+                    let dx = abs(newFrame.origin.x - oldFrame.origin.x)
+                    let dy = abs(newFrame.origin.y - oldFrame.origin.y)
+                    let dw = abs(newFrame.size.width  - oldFrame.size.width)
+                    let dh = abs(newFrame.size.height - oldFrame.size.height)
+
+                    let movedOnly   = (dx > 1 || dy > 1) && (dw <= 1 && dh <= 1)
+                    let resizedOnly = (dw > 1 || dh > 1) && (dx <= 1 && dy <= 1)
+                    let bothChanged = (dx > 1 || dy > 1) && (dw > 1 || dh > 1)
+
+                    if movedOnly {
+                        print("🟦 moved → echte Positionsänderung")
+                        self.handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
+                    } else if resizedOnly {
+                        print("🟩 resized → echte Größenänderung")
                         self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
-                    } else if moved {
-                        print(": moved")
+                    } else if bothChanged {
+                        // zuerst Größe, dann Position, damit Z-Reihenfolge stabil bleibt
+                        print("🟨 move+resize → beides")
+                        self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
                         self.handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
                     }
                 }
