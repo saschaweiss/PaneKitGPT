@@ -53,8 +53,15 @@ extension PaneKitEventManager {
             }
         }
         
-        if AXObserverCreate(app.processIdentifier, callback, &observer) == .success, let observer = observer {
-            observers[app.processIdentifier] = observer
+        let result = AXObserverCreate(app.processIdentifier, callback, &observer)
+        
+        guard result == .success, let observer = observer else {
+            print("⚠️ AXObserver konnte nicht für \(app.localizedName ?? "Unbekannt") erstellt werden.")
+            PaneKitManager.shared.scheduleRecoveryIfNeeded()
+            return
+        }
+        
+        observers[app.processIdentifier] = observer
             
             let notifications = [
                 kAXMovedNotification,
