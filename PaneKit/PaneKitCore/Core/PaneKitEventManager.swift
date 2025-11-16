@@ -178,10 +178,33 @@ extension PaneKitEventManager {
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
         let stableID = window.stableID
 
-        if isDragging && (name == AXNotify.moved.string || name == AXNotify.resized.string) {
-            if let screen = window.screen {
-                Self.pendingWindowChanges[stableID] = (window.frame, screen, Date())
+        if name == AXNotify.moved.string || name == AXNotify.resized.string {
+            guard let screen = window.screen else { return }
+            let newFrame = window.frame
+            let oldFrame = lastKnownFrames[stableID] ?? .zero
+            
+            guard !newFrame.equalTo(oldFrame) else { return }
+            lastKnownFrames[stableID] = newFrame
+
+            if NSEvent.pressedMouseButtons != 0 {
+                Self.pendingWindowChanges[stableID] = (newFrame, screen, Date())
+                isDragging = true
+                return
             }
+
+            if isDragging {
+                isDragging = false
+
+                if let (frame, screen, _) = Self.pendingWindowChanges[stableID] {
+                    Self.pendingWindowChanges.removeAll()
+                    updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
+                } else {
+                    updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
+                }
+                return
+            }
+
+            updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
             return
         }
         
