@@ -66,10 +66,10 @@ extension PaneKitEventManager {
             
         let notifications = [
             AXNotify.moved.string,
-            kAXResizedNotification,
-            kAXFocusedWindowChangedNotification,
-            kAXCreatedNotification,
-            kAXUIElementDestroyedNotification
+            AXNotify.resized.string,
+            AXNotify.focusedWindowChanged.string,
+            AXNotify.created.string,
+            AXNotify.uiElementDestroyed.string
         ]
         
         for note in notifications {
