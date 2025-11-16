@@ -88,9 +88,10 @@ extension PaneKitEventManager {
             AXObserverAddNotification(observer, axApp, note as CFString, nil)
         }
         
-        var windowList: CFTypeRef?
-        if AXUIElementCopyAttributeValue(axApp, AXAttr.windows as CFString, &windowList) == .success,
-           let windows = windowList as? [AXUIElement] {
+        var rawWindows: CFTypeRef?
+        if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &rawWindows) == .success,
+           let windowArray = rawWindows as? [Any],
+           let windows = windowArray as? [AXUIElement] {
             for win in windows {
                 for note in notifications {
                     AXObserverAddNotification(observer, win, note as CFString, nil)
