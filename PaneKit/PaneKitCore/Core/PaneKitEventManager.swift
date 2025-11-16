@@ -242,7 +242,9 @@ extension PaneKitEventManager {
     }
     
     private func updateWindowPosition(stableID: String, frame: CGRect, screen: NSScreen) {
-        print("updateWindowPosition")
+        print("updateWindowPosition (executing once per completed drag)")
+
+        suppressedStableIDs.insert(stableID)
         guard let window = PaneKitCache.shared.get(stableID) else { return }
         window.frame = frame
         window.screen = screen
