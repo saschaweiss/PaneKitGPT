@@ -13,6 +13,8 @@ final class PaneKitEventManager {
     private var isDragging: Bool = false
     private var lastStableID: String?
     private var lastDraggedStableID: String?
+    private var lastFrameDuringDrag: CGRect?
+    private var lastScreenDuringDrag: NSScreen?
     private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen, lastUpdate: Date)] = [:]
     private static let moveResizeDebounceInterval: TimeInterval = 0.25
     
