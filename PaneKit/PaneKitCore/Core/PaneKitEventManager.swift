@@ -138,19 +138,17 @@ extension PaneKitEventManager {
 }
 
 extension PaneKitEventManager {
-    private static let moveResizeDebounceInterval: TimeInterval = 0.25
     private static var debounceTimer: Timer?
     private static var suppressedStableIDs: [String: Date] = [:]
     
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
-
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
         let stableID = window.stableID
 
         if isDragging && (name == kAXMovedNotification || name == kAXResizedNotification) {
             if let screen = window.screen {
-                Self.pendingWindowChanges[stableID] = (window.frame, screen)
+                Self.pendingWindowChanges[stableID] = (window.frame, screen, Date())
             }
             return
         }
