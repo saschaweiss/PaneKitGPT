@@ -189,21 +189,32 @@ extension PaneKitEventManager {
             guard let screen = window.screen else { return }
             let newFrame = window.frame
             let oldFrame = lastKnownFrames[stableID] ?? .zero
-            
+
+            // Wenn Frame unverändert → ignorieren
             guard !newFrame.equalTo(oldFrame) else { return }
+
+            // Bewegung oder Größenänderung erkennen
+            let moved = abs(newFrame.origin.x - oldFrame.origin.x) > 1 ||
+                        abs(newFrame.origin.y - oldFrame.origin.y) > 1
+            let resized = abs(newFrame.size.width - oldFrame.size.width) > 1 ||
+                          abs(newFrame.size.height - oldFrame.size.height) > 1
+
             lastKnownFrames[stableID] = newFrame
             moveResizeWorkItems[stableID]?.cancel()
 
             let workItem = DispatchWorkItem { [weak self] in
                 guard let self else { return }
                 Task { @MainActor in
-                    self.updateWindowPosition(stableID: stableID, frame: newFrame, screen: screen)
+                    if resized {
+                        self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
+                    } else if moved {
+                        self.handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
+                    }
                 }
             }
 
             moveResizeWorkItems[stableID] = workItem
             DispatchQueue.main.asyncAfter(deadline: .now() + moveResizeDelay, execute: workItem)
-
             return
         }
         
