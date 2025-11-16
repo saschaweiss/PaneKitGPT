@@ -219,7 +219,17 @@ extension PaneKitEventManager {
                         self.handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
                     } else if resizedDominant {
                         print("🟩 resized → dominante Größenänderung (\(dw),\(dh))")
-                        self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
+                        let now = Date()
+                        self.lastResizeTimestamps[stableID] = now
+
+                        // Verzögert ausführen, um sicherzugehen, dass keine neuen Events mehr kommen
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                            guard let self else { return }
+                            // Wenn seit dem letzten Event mindestens 100 ms vergangen sind → jetzt anwenden
+                            if let last = self.lastResizeTimestamps[stableID], Date().timeIntervalSince(last) >= 0.1 {
+                                self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
+                            }
+                        }
                     } else if bothChanged {
                         print("🟨 move+resize → beides (\(dx),\(dy),\(dw),\(dh))")
                         self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
