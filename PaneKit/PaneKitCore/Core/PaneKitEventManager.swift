@@ -6,8 +6,9 @@ import ApplicationServices
 final class PaneKitEventManager {
     static let shared = PaneKitEventManager()
     
-    private var isRunning = false
+    private(set) var isRunning = false
     private var observers: [pid_t: AXObserver] = [:]
+    private var lastEventTimestamp: Date = .now
     
     private init() {}
     
