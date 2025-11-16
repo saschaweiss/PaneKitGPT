@@ -126,7 +126,7 @@ extension PaneKitEventManager {
         print("🩺 Recovery-Timer aktiviert (alle 20s).")
     }
     
-    public func recoverIfNeeded() {
+    public static func recoverIfNeeded() {
         if !self.isHealthy {
             print("⚠️ EventManager inaktiv – versuche Neuverbindung...")
             self.stop()
