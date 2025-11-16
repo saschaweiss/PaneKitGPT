@@ -156,14 +156,12 @@ extension PaneKitEventManager {
                 }
                 
             case kAXMovedNotification:
-                if let window = PaneKitWindow.fromAXElement(element),
-                   let screen = window.screen {
+                if let window = PaneKitWindow.fromAXElement(element), let screen = window.screen {
                     handleEvent(.windowMoved(stableID: window.stableID, frame: window.frame, screen: screen))
                 }
                 
             case kAXResizedNotification:
-                if let window = PaneKitWindow.fromAXElement(element),
-                   let screen = window.screen {
+                if let window = PaneKitWindow.fromAXElement(element), let screen = window.screen {
                     handleEvent(.windowResized(stableID: window.stableID, frame: window.frame, screen: screen))
                 }
                 
