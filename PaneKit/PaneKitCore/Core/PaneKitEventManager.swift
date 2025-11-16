@@ -65,7 +65,7 @@ extension PaneKitEventManager {
         observers[app.processIdentifier] = observer
             
         let notifications = [
-            AXNotify.moved.raw,
+            AXNotify.moved.string,
             kAXResizedNotification,
             kAXFocusedWindowChangedNotification,
             kAXCreatedNotification,
