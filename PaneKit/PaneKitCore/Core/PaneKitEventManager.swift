@@ -208,10 +208,10 @@ extension PaneKitEventManager {
     
     @MainActor
     private func handleMoveOrResize(stableID: String, frame: CGRect, screen: NSScreen) {
-        Self.pendingWindowChanges[stableID] = (frame, screen, Date())
-
         if NSEvent.pressedMouseButtons != 0 {
             isDragging = true
+            lastDraggedStableID = stableID
+            Self.pendingWindowChanges[stableID] = (frame, screen)
             return
         }
 
