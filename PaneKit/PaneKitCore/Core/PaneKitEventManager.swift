@@ -192,12 +192,6 @@ extension PaneKitEventManager {
     }
     
     @MainActor
-    private var isDragging: Bool = false
-    
-    @MainActor
-    private var lastStableID: String?
-    
-    @MainActor
     private func debounceMoveResizeEvents() {
         if NSEvent.pressedMouseButtons != 0 {
             isDragging = true
