@@ -165,22 +165,22 @@ extension PaneKitEventManager {
                 PaneKitCache.shared.store(window)
                 handleEvent(.focusChanged(stableID: stableID))
 
-        case kAXMovedNotification, kAXResizedNotification:
-            if let screen = window.screen {
-                let newFrame = window.frame
-                let oldFrame = lastKnownFrames[stableID] ?? .zero
+            case kAXMovedNotification, kAXResizedNotification:
+                if let screen = window.screen {
+                    let newFrame = window.frame
+                    let oldFrame = lastKnownFrames[stableID] ?? .zero
 
-                // Prüfen, ob sich die Position oder Größe tatsächlich verändert hat
-                if abs(newFrame.origin.x - oldFrame.origin.x) > 1 ||
-                   abs(newFrame.origin.y - oldFrame.origin.y) > 1 ||
-                   abs(newFrame.size.width - oldFrame.size.width) > 1 ||
-                   abs(newFrame.size.height - oldFrame.size.height) > 1 {
+                    // Prüfen, ob sich die Position oder Größe tatsächlich verändert hat
+                    if abs(newFrame.origin.x - oldFrame.origin.x) > 1 ||
+                       abs(newFrame.origin.y - oldFrame.origin.y) > 1 ||
+                       abs(newFrame.size.width - oldFrame.size.width) > 1 ||
+                       abs(newFrame.size.height - oldFrame.size.height) > 1 {
 
-                    // Aktualisieren und Event senden
-                    lastKnownFrames[stableID] = newFrame
-                    handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
+                        // Aktualisieren und Event senden
+                        lastKnownFrames[stableID] = newFrame
+                        handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
+                    }
                 }
-            }
 
             case kAXCreatedNotification:
                 handleEvent(.windowCreated(window))
@@ -249,21 +249,6 @@ extension PaneKitEventManager {
                 self.lastDraggedStableID = nil
                 self.lastFrameDuringDrag = nil
                 self.lastScreenDuringDrag = nil
-            }
-        }
-    }
-
-    @MainActor
-    private func debounceFlushPendingChanges() {
-        if Self.debounceTimer != nil { return }
-
-        Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
-            guard let self else { return }
-
-            if NSEvent.pressedMouseButtons == 0 {
-                self.flushPendingWindowChanges()
-                timer.invalidate()
-                Self.debounceTimer = nil
             }
         }
     }
