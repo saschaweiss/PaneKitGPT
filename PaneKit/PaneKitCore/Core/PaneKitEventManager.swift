@@ -234,22 +234,15 @@ extension PaneKitEventManager {
 
     @MainActor
     private func debounceFlushPendingChanges() {
-        Self.debounceTimer?.invalidate()
+        if Self.debounceTimer != nil { return }
 
-        Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { _ in
-            Task { @MainActor in
-                if NSEvent.pressedMouseButtons == 0 {
-                    self.flushPendingWindowChanges()
-                    Self.debounceTimer?.invalidate()
-                    Self.debounceTimer = nil
-                } else {
-                    Self.debounceTimer?.invalidate()
-                    Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
-                        Task { @MainActor in
-                            self.debounceFlushPendingChanges()
-                        }
-                    }
-                }
+        Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] timer in
+            guard let self else { return }
+
+            if NSEvent.pressedMouseButtons == 0 {
+                self.flushPendingWindowChanges()
+                timer.invalidate()
+                Self.debounceTimer = nil
             }
         }
     }
