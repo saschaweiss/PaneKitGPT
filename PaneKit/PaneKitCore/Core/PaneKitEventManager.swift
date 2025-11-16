@@ -208,22 +208,14 @@ extension PaneKitEventManager {
     
     @MainActor
     private func handleMoveOrResize(stableID: String, frame: CGRect, screen: NSScreen) {
-        if NSEvent.pressedMouseButtons != 0 {
-            isDragging = true
+        if isDragging {
             lastDraggedStableID = stableID
-            Self.pendingWindowChanges[stableID] = (frame, screen, Date())
-            debounceFlushPendingChanges()
+            lastFrameDuringDrag = frame
+            lastScreenDuringDrag = screen
             return
         }
 
-        if isDragging {
-            isDragging = false
-            if let (finalFrame, finalScreen, _) = Self.pendingWindowChanges[stableID] {
-                updateWindowPosition(stableID: stableID, frame: finalFrame, screen: finalScreen)
-            }
-            Self.pendingWindowChanges.removeAll()
-            Self.debounceTimer?.invalidate()
-        }
+        updateWindowPosition(stableID: stableID, frame: frame, screen: screen)
     }
     
     @MainActor
