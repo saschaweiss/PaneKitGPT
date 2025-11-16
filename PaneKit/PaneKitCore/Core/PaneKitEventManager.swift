@@ -68,8 +68,7 @@ final class PaneKitEventManager {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             var value: CFTypeRef?
-            if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &value) == .success,
-               let windows = value as? [AXUIElement] {
+            if AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &value) == .success, let windows = value as? [AXUIElement] {
                 for win in windows {
                     AXObserverAddNotification(observer, win, kAXMovedNotification as CFString, nil)
                     AXObserverAddNotification(observer, win, kAXResizedNotification as CFString, nil)
