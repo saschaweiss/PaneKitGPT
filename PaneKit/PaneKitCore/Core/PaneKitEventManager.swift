@@ -204,7 +204,7 @@ extension PaneKitEventManager {
             case AXNotify.created.string:
                 handleEvent(.windowCreated(window))
                 if let observer = observers[window.pid] {
-                    AXObserverAddNotification(observer, window.element, AXNotify.moved.string, nil)
+                    AXObserverAddNotification(observer, window.element, AXNotify.moved.raw, nil)
                     AXObserverAddNotification(observer, window.element, AXNotify.resized.string, nil)
                 }
 
