@@ -15,12 +15,14 @@ final class PaneKitEventManager {
     func start() {
         guard !isRunning else { return }
         isRunning = true
+        observers.removeAll()
         
         for app in NSWorkspace.shared.runningApplications where app.isFinishedLaunching && app.isActive {
             attachToApp(app)
         }
         
         setupWorkspaceObservers()
+        print("👂 PaneKitEventManager gestartet")
     }
     
     func stop() {
