@@ -142,12 +142,14 @@ extension PaneKitEventManager {
 
 extension PaneKitEventManager {
     private func updateFocus(for stableID: String) {
+        print("updateFocus")
         for window in PaneKitCache.shared.all() {
             window.isFocused = (window.stableID == stableID)
         }
     }
     
     private func updateWindowPosition(stableID: String, frame: CGRect, screen: NSScreen) {
+        print("updateWindowPosition")
         guard let window = PaneKitCache.shared.get(stableID) else { return }
         window.frame = frame
         window.screen = screen
@@ -155,6 +157,7 @@ extension PaneKitEventManager {
     }
     
     private func fetchZIndex(for window: PaneKitWindow) -> Int {
+        print("fetchZIndex")
         return 0
     }
 }
