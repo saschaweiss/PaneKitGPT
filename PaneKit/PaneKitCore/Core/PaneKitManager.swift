@@ -93,7 +93,7 @@ public final class PaneKitManager: Sendable {
     public func stop() {
         eventManager.stop()
         cache.clear()
-        PaneKitEventManager.stopRecoveryTimer()
+        PaneKitEventManager.stopRecoveryTimer(<#T##self: PaneKitEventManager##PaneKitEventManager#>)
         PaneKitEventManager.
         isRunning = false
         print("🛑 PaneKitManager gestoppt.")
