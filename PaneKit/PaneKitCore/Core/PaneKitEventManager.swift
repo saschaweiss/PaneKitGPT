@@ -226,11 +226,12 @@ extension PaneKitEventManager {
         NSEvent.addGlobalMonitorForEvents(matching: .leftMouseUp) { _ in
             Task { @MainActor in
                 self.isDragging = false
-                if let id = self.lastDraggedStableID,
-                   let frame = self.lastFrameDuringDrag,
-                   let screen = self.lastScreenDuringDrag {
-                    self.updateWindowPosition(stableID: id, frame: frame, screen: screen)
+
+                for (stableID, change) in Self.pendingWindowChanges {
+                    self.updateWindowPosition(stableID: stableID, frame: change.frame, screen: change.screen)
                 }
+
+                Self.pendingWindowChanges.removeAll()
                 self.lastDraggedStableID = nil
                 self.lastFrameDuringDrag = nil
                 self.lastScreenDuringDrag = nil
