@@ -209,7 +209,6 @@ extension PaneKitEventManager {
 
                 let changes = Self.pendingWindowChanges
                 Self.pendingWindowChanges.removeAll()
-                guard NSEvent.pressedMouseButtons == 0 else { return }
 
                 for (stableID, change) in changes {
                     self.updateWindowPosition(
