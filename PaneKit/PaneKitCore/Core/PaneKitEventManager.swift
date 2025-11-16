@@ -23,6 +23,9 @@ final class PaneKitEventManager {
     private var moveResizeWorkItems: [String: DispatchWorkItem] = [:]
     private let moveResizeDelay: TimeInterval = 0.15
     
+    private var resizeSamples: [String: [CGSize]] = [:]
+    private var moveSamples: [String: [CGPoint]] = [:]
+    
     private init() {}
     
     func start() {
