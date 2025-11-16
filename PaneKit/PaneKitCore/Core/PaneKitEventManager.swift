@@ -217,6 +217,8 @@ extension PaneKitEventManager {
                         screen: change.screen
                     )
                 }
+                
+                isDragging = false
             }
         }
     }
