@@ -22,6 +22,8 @@ final class PaneKitEventManager {
     private static let moveResizeDebounceInterval: TimeInterval = 0.25
     private var moveResizeWorkItems: [String: DispatchWorkItem] = [:]
     private let moveResizeDelay: TimeInterval = 0.15
+    private let eventQueue = DispatchQueue(label: "com.panekit.axevents", qos: .userInteractive)
+    private var pendingEvents: [(String, AXUIElement)] = []
     
     private var resizeSamples: [String: [CGSize]] = [:]
     private var moveSamples: [String: [CGPoint]] = [:]
