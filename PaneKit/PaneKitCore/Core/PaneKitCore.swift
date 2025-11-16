@@ -430,54 +430,24 @@ extension PaneKitWindow {
     public var screenName: String { screen?.localizedName ?? "Unknown screen" }
     
     static func fromAXElement(_ element: AXUIElement) -> PaneKitWindow? {
-        var frame = CGRect.zero
-        var bundleID = "unknown"
-        var title = "Untitled"
-        var screen: NSScreen? = NSScreen.main
-        var parentID: String?
-        var windowType: PaneKitWindowType = .window
-        
-        if let position = copyAXValue(for: kAXPositionAttribute, of: element) as? CGPoint,
-           let size = copyAXValue(for: kAXSizeAttribute, of: element) as? CGSize {
-            frame = CGRect(origin: position, size: size)
+        // Erstelle PKWindow direkt über den Core-Mechanismus
+        guard let pkWindow = PKWindow(axElement: element) else {
+            return nil
         }
-        
-        var pid: pid_t = 0
-        AXUIElementGetPid(element, &pid)
-        if let app = NSRunningApplication(processIdentifier: pid),
-           let bid = app.bundleIdentifier {
-            bundleID = bid
-        }
-        
-        if let axTitle = copyAXValue(for: kAXTitleAttribute, of: element) as? String {
-            title = axTitle
-        }
-        
-        screen = NSScreen.screens.first(where: { $0.frame.intersects(frame) }) ?? NSScreen.main
-        
+
+        // Jetzt kannst du direkt einen Swift-Wrapper erzeugen
+        let window = PaneKitWindow(pkWindow: pkWindow)
+
+        // Der PKWindow kümmert sich um stableID, frame, screen, etc.
+        // Wir müssen nur noch den windowType bestimmen
         if let role = copyAXValue(for: kAXRoleAttribute, of: element) as? String {
             switch role {
             case kAXTabGroupRole as String, "AXTab", "AXSheet":
-                windowType = .tab
+                window.windowType = .tab
             default:
-                windowType = .window
+                window.windowType = .window
             }
         }
-        
-        let pkWindow = PKWindow()
-        pkWindow.frame = frame
-        pkWindow.bundleID = bundleID
-        pkWindow.title = title
-        pkWindow.screen = screen
-        
-        if let parent = copyAXValue(for: kAXParentAttribute, of: element) as? AXUIElement {
-            if let parentPK = PKWindow(axElement: parent) {
-                parentID = parentPK.stableID
-            }
-        }
-        
-        let window = PaneKitWindow(pkWindow: pkWindow)
-        assert(window.stableID.count > 0, "⚠️ PaneKitWindow hat keine gültige stableID – PKWindow sollte sie setzen!")
 
         return window
     }
