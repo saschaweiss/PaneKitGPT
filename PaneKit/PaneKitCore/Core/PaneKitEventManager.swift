@@ -202,8 +202,10 @@ extension PaneKitEventManager {
                 guard let self else { return }
                 Task { @MainActor in
                     if resized {
+                        print(": resized")
                         self.handleEvent(.windowResized(stableID: stableID, frame: newFrame, screen: screen))
                     } else if moved {
+                        print(": moved")
                         self.handleEvent(.windowMoved(stableID: stableID, frame: newFrame, screen: screen))
                     }
                 }
