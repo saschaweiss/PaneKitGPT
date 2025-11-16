@@ -208,6 +208,7 @@ extension PaneKitEventManager {
             isDragging = true
             lastDraggedStableID = stableID
             Self.pendingWindowChanges[stableID] = (frame, screen, Date())
+            debounceFlushPendingChanges()
             return
         }
 
