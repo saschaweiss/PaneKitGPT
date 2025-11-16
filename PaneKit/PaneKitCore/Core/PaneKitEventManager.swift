@@ -190,14 +190,10 @@ extension PaneKitEventManager {
             let newFrame = window.frame
             let oldFrame = lastKnownFrames[stableID] ?? .zero
 
-            // Wenn Frame unverändert → ignorieren
             guard !newFrame.equalTo(oldFrame) else { return }
 
-            // Bewegung oder Größenänderung erkennen
-            let moved = abs(newFrame.origin.x - oldFrame.origin.x) > 1 ||
-                        abs(newFrame.origin.y - oldFrame.origin.y) > 1
-            let resized = abs(newFrame.size.width - oldFrame.size.width) > 1 ||
-                          abs(newFrame.size.height - oldFrame.size.height) > 1
+            let moved = abs(newFrame.origin.x - oldFrame.origin.x) > 1 || abs(newFrame.origin.y - oldFrame.origin.y) > 1
+            let resized = abs(newFrame.size.width - oldFrame.size.width) > 1 || abs(newFrame.size.height - oldFrame.size.height) > 1
 
             lastKnownFrames[stableID] = newFrame
             moveResizeWorkItems[stableID]?.cancel()
