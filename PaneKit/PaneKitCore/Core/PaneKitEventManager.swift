@@ -150,7 +150,10 @@ extension PaneKitEventManager {
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
         let stableID = window.stableID
 
-        if let lastUpdate = Self.suppressedStableIDs[stableID], Date().timeIntervalSince(lastUpdate) < 0.5 {
+        if isDragging && (name == kAXMovedNotification || name == kAXResizedNotification) {
+            if let screen = window.screen {
+                Self.pendingWindowChanges[stableID] = (window.frame, screen)
+            }
             return
         }
         
