@@ -207,7 +207,7 @@ extension PaneKitEventManager {
         if NSEvent.pressedMouseButtons != 0 {
             isDragging = true
             lastDraggedStableID = stableID
-            Self.pendingWindowChanges[stableID] = (frame, screen)
+            Self.pendingWindowChanges[stableID] = (window.frame, screen, Date())
             return
         }
 
