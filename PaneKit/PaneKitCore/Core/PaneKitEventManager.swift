@@ -193,10 +193,15 @@ extension PaneKitEventManager {
     
     @MainActor
     private func debounceMoveResizeEvents() {
-        Self.debounceTimer?.invalidate()
-        
-        static var isDragging = false
-        isDragging = true
+        struct DragState {
+            static var isDragging = false
+            static var lastStableID: String?
+        }
+
+        if NSEvent.pressedMouseButtons != 0 {
+            DragState.isDragging = true
+            return
+        }
 
         Self.debounceTimer = Timer.scheduledTimer(withTimeInterval: Self.moveResizeDebounceInterval, repeats: false) { [weak self] _ in
             Task { @MainActor in
