@@ -163,7 +163,7 @@ extension PaneKitEventManager {
         guard let window = PaneKitWindow.fromAXElement(element) else { return }
         let stableID = window.stableID
 
-        if isDragging && (name == AXNotify.moved.raw || name == AXNotify.resized.raw) {
+        if isDragging && (name == AXNotify.moved.string || name == AXNotify.resized.string) {
             if let screen = window.screen {
                 Self.pendingWindowChanges[stableID] = (window.frame, screen, Date())
             }
@@ -171,11 +171,11 @@ extension PaneKitEventManager {
         }
         
         switch name {
-            case kAXFocusedWindowChangedNotification:
+            case AXNotify.focusedWindowChanged.string:
                 PaneKitCache.shared.store(window)
                 handleEvent(.focusChanged(stableID: stableID))
 
-            case kAXMovedNotification, kAXResizedNotification:
+            case AXNotify.moved.string, AXNotify.resized.string:
                 guard let screen = window.screen else { return }
                 let newFrame = window.frame
                 let oldFrame = lastKnownFrames[stableID] ?? .zero
