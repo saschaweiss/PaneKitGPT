@@ -93,12 +93,12 @@ extension PaneKitEventManager {
             
         case AXNotify.moved.string:
             if let window = PaneKitWindow.fromAXElement(element) {
-                handleEvent(.windowMoved(stableID: window.stableID, frame: window.frame, screen: window.screen))
+                handleEvent(.windowMoved(stableID: window.stableID, frame: window.frame, screen: window.screen ?? NSScreen.main!))
             }
             
         case AXNotify.resized.string:
             if let window = PaneKitWindow.fromAXElement(element) {
-                handleEvent(.windowResized(stableID: window.stableID, frame: window.frame, screen: window.screen))
+                handleEvent(.windowResized(stableID: window.stableID, frame: window.frame, screen: window.screen ?? NSScreen.main!))
             }
             
         case AXNotify.created.string:
