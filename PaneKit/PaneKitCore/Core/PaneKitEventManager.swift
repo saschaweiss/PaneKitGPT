@@ -138,7 +138,7 @@ extension PaneKitEventManager {
     private static let moveResizeDebounceInterval: TimeInterval = 0.25
     private static var pendingWindowChanges: [String: (frame: CGRect, screen: NSScreen, lastUpdate: Date)] = [:]
     private static var debounceTimer: Timer?
-    private static var suppressedStableIDs: Set<String> = []
+    private static var suppressedStableIDs: [String: Date] = [:]
     
     private func handleAXNotification(_ name: String, element: AXUIElement) {
         lastEventTimestamp = .now
@@ -244,7 +244,7 @@ extension PaneKitEventManager {
     private func updateWindowPosition(stableID: String, frame: CGRect, screen: NSScreen) {
         print("updateWindowPosition (executing once per completed drag)")
 
-        suppressedStableIDs.insert(stableID)
+        PaneKitEventManager.suppressedStableIDs.insert(stableID)
         
         defer {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
