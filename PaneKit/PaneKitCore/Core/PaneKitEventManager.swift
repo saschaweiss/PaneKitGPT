@@ -213,7 +213,7 @@ extension PaneKitEventManager {
 
         if isDragging {
             isDragging = false
-            if let (finalFrame, finalScreen) = Self.pendingWindowChanges[stableID] {
+            if let (finalFrame, finalScreen, _) = Self.pendingWindowChanges[stableID] {
                 updateWindowPosition(stableID: stableID, frame: finalFrame, screen: finalScreen)
             }
             Self.pendingWindowChanges.removeAll()
