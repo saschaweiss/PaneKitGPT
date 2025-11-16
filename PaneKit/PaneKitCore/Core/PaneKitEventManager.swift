@@ -128,8 +128,8 @@ extension PaneKitEventManager {
     private func recoverIfNeeded() {
         if !self.isHealthy {
             print("⚠️ EventManager inaktiv – versuche Neuverbindung...")
-            eventManager.stop()
-            eventManager.start()
+            self.stop()
+            self.start()
         }
     }
     
