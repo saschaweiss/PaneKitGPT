@@ -193,6 +193,8 @@ extension PaneKitEventManager {
     
     @MainActor
     private var isDragging: Bool = false
+    
+    @MainActor
     private var lastStableID: String?
     
     @MainActor
