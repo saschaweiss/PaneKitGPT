@@ -153,7 +153,8 @@ public struct AXRole: RawRepresentable, Hashable, @unchecked Sendable  {
     public init(rawValue: CFString) { self.rawValue = rawValue }
     
     public static let window = AXNotify(rawValue: kAXWindowRole as CFString)
-    public static let radioButton = AXNotify(rawValue: kAXRadioButtonRole as CFString)
+    public static let radioButton = AXRole(rawValue: kAXRadioButtonRole as CFString)
+    public static let radioButton = AXRole(rawValue: kAXTabGroupRole as CFString)
 }
 
 public struct AXNotify: RawRepresentable, Hashable, @unchecked Sendable {
