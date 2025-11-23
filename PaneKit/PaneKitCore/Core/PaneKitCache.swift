@@ -2,56 +2,56 @@ import Foundation
 import CoreGraphics
 
 @MainActor
-final class PaneKitCache {
-    static let shared = PaneKitCache()
+public final class PaneKitCache {
+    public static let shared = PaneKitCache()
     private var cache: [String: PaneKitWindow] = [:]
     
     private init() {}
     
-    func store(_ window: PaneKitWindow) {
+    public func store(_ window: PaneKitWindow) {
         cache[window.stableID] = window
         notifyUpdate()
     }
     
-    func store(_ windows: [PaneKitWindow]) {
+    public func store(_ windows: [PaneKitWindow]) {
         for window in windows {
             cache[window.stableID] = window
         }
         notifyUpdate()
     }
     
-    func get(_ stableID: String) -> PaneKitWindow? {
+    public func get(_ stableID: String) -> PaneKitWindow? {
         cache[stableID]
     }
     
-    func all() -> [PaneKitWindow] {
+    public func all() -> [PaneKitWindow] {
         Array(cache.values)
     }
     
-    func focusedWindow() -> PaneKitWindow? {
+    public func focusedWindow() -> PaneKitWindow? {
         cache.values.first(where: { $0.isFocused })
     }
     
-    func remove(_ stableID: String) {
+    public func remove(_ stableID: String) {
         cache.removeValue(forKey: stableID)
         notifyUpdate()
     }
     
-    func removeAll(where predicate: (PaneKitWindow) -> Bool) {
+    public func removeAll(where predicate: (PaneKitWindow) -> Bool) {
         cache = cache.filter { !predicate($0.value) }
         notifyUpdate()
     }
     
-    func clear() {
+    public func clear() {
         cache.removeAll()
         notifyUpdate()
     }
     
-    func contains(_ stableID: String) -> Bool {
+    public func contains(_ stableID: String) -> Bool {
         cache.keys.contains(stableID)
     }
     
-    func count() -> Int {
+    public func count() -> Int {
         cache.count
     }
     
