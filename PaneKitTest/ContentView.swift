@@ -1,213 +1,196 @@
 import SwiftUI
 import PaneKitCore
-
+ 
 @main
 struct PaneKitApp: App {
-    @State private var paneKit = PaneKit(notifyOnMainThread: true, enableLogging: true, includingTabs: true)
-    @State private var windows: [PaneKitWindow] = []
-    @State private var isLoading = false
-    @State private var showTabs = true
+    @StateObject private var windowManager = WindowManager()
     
     init() {
-        print("kkk")
+        // ✅ Console-Spam beheben
+        PaneKitEventManager.shared.setLogLevel(.minimal)
     }
-
-    var body: some Scene {
-        WindowGroup { EmptyView() }
-    }
-}
-
-/*
-@main
-struct ContentView: App {
-    @State private var paneKit = PaneKit(notifyOnMainThread: true, enableLogging: true, includingTabs: true)
-    @State private var windows: [PaneKitWindow] = []
-    @State private var isLoading = false
-    @State private var showTabs = true
-    @StateObject private var cacheModel = PaneKitCacheModel()
-    
-    init() {
-        Task {
-            await setupPaneKit()
-        }
-    }
-    
-    private func setupPaneKit() async {
-        await PaneKitCore.shared.start()
-
-        let allWindows = await PaneKitCache.shared.allWindows()
-        await MainActor.run {
-            cacheModel.windows = allWindows
-            print("✅ PaneKit initialized with \(allWindows.count) windows.")
-        }
-
-        await PaneKitEventCenter.shared.subscribe(event: "focusChange") { event in
-            guard let id = event.windowID else { return }
-            guard let win = await PaneKitCache.shared.window(forStableID: id) else { return }
-            print("🎯 Global Focus change: \(win.appName) – \(win.title)")
-        }
-
-        await PaneKitEventCenter.shared.subscribe(event: "close") { event in
-            guard let id = event.windowID else { return }
-            guard let win = await PaneKitCache.shared.window(forStableID: id) else { return }
-            print("🧹 Window closed: \(win.appName)")
-        }
-
-        for window in allWindows {
-            await Self.registerWindowEvents(for: window)
-        }
-    }
-
+ 
     var body: some Scene {
         WindowGroup {
-            MainContentView(cacheModel: cacheModel, isLoading: $isLoading, showTabs: $showTabs)
-        }
-    }
-}
-
-extension ContentView {
-    static func registerWindowEvents(for window: PaneKitWindow) async {
-        await window.onEvent("focus") { snapshot in
-            await MainActor.run {
-                print("⭐ Window focused: \(snapshot.title)")
-            }
-        }
-
-        await window.onEvent("minimize") { snapshot in
-            await MainActor.run {
-                print("💤 Window minimized: \(snapshot.title)")
-            }
-        }
-
-        await window.onEvent("close") { snapshot in
-            await MainActor.run {
-                print("🧹 Window closed: \(snapshot.title)")
-            }
-        }
-    }
-
-    static func registerTabEvents(for tab: PaneKitWindow) async {
-        await tab.onEvent("focus") { tab in
-            await MainActor.run {
-                print("📑 Tab focused: \(tab.title)")
-            }
-        }
-
-        await tab.onEvent("titleChanged") { changedTab in
-            await MainActor.run {
-                print("📝 Tab title changed: \(changedTab.title)")
-            }
-        }
-    }
-}
-
-struct MainContentView: View {
-    @ObservedObject var cacheModel: PaneKitCacheModel
-    @Binding var isLoading: Bool
-    @Binding var showTabs: Bool
-    
-    private var windows: [PaneKitWindow] {
-        cacheModel.windows
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            headerSection
-            Divider()
-
-            if isLoading {
-                ProgressView("Loading windows…").padding(.top, 20)
-            } else if windows.isEmpty {
-                Text("No windows found.").foregroundStyle(.secondary).padding(.top, 30)
-            } else {
-                tableSection
-            }
-
-            Spacer()
-        }
-        .padding(20)
-        .task {
-            for await _ in NotificationCenter.default.notifications(named: .paneKitCacheDidUpdate) {
-                let windows = await PaneKitCache.shared.allWindows()
-                await MainActor.run {
-                    cacheModel.updateWindows(windows)
+            ContentView()
+                .environmentObject(windowManager)
+                .task {
+                    await windowManager.initialize()
                 }
-            }
-        }
+        } 
     }
+}
+
+// ✅ Window Manager für State-Management
+@MainActor
+class WindowManager: ObservableObject {
+    @Published var windows: [PaneKitWindow] = []
+    @Published var isLoading = false
+    private var hasInitialized = false
     
-    private func initialLoad() async {
+    func initialize() async {
+        guard !hasInitialized else { return }
+        hasInitialized = true
+        
         isLoading = true
         defer { isLoading = false }
-
-        //let cached = await PaneKitCache.shared.allWindows(includeTabs: true)
-
+        
+        // PaneKit starten
+        await PaneKitManager.shared.start(includingTabs: true)
+        
+        // Initiale Fenster laden
+        await refreshWindows()
+        
+        // Auf Cache-Updates lauschen
+        Task {
+            for await _ in NotificationCenter.default.notifications(named: .paneKitCacheDidUpdate) {
+                await refreshWindows()
+            }
+        }
+    }
+    
+    func refreshWindows() async {
+        let allWindows = PaneKitCache.shared.all()
         await MainActor.run {
-            //cacheModel.windows = cached
-            //print("🪟 Loaded \(cached.count) windows from cache (including tabs).")
+            self.windows = allWindows
+            print("📊 Windows updated: \(allWindows.count) total")
         }
-
-        //await PaneKitCache.shared.debugDumpWindows()
     }
+}
 
-    private var headerSection: some View {
-        HStack {
-            Text("PaneKit Window overview").font(.title2).fontWeight(.semibold)
-            Spacer()
+struct ContentView: View {
+    @EnvironmentObject var windowManager: WindowManager
+    @State private var showTabs = true
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            HStack {
+                Text("PaneKit Window Overview")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                Toggle("Show Tabs", isOn: $showTabs)
+                    .toggleStyle(.switch)
+                    .frame(width: 150)
+                
+                Button {
+                    Task { await windowManager.refreshWindows() }
+                } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                }
+                .disabled(windowManager.isLoading)
+            }
+            .padding(.horizontal)
+            .padding(.top)
             
-            //Button { Task { await refreshCache() } } label: { Label("Reload", systemImage: "arrow.clockwise") }.disabled(isLoading)
-
-            //Button { Task { await clearCache() } } label: { Label("Clear", systemImage: "trash") }
-
-            Toggle("Show tabs", isOn: $showTabs).toggleStyle(.switch).frame(width: 150)
+            Divider()
+            
+            // Content
+            if windowManager.isLoading {
+                VStack {
+                    ProgressView("Loading windows...")
+                    Text("Please wait...")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if windowManager.windows.isEmpty {
+                VStack {
+                    Image(systemName: "rectangle.3.group")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.secondary)
+                    Text("No windows found")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                    Text("Make sure you've granted Accessibility permissions")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                WindowListView(
+                    windows: windowManager.windows,
+                    showTabs: showTabs
+                )
+            }
+            
+            // Footer Stats
+            Divider()
+            HStack {
+                Label("\(windowCount) Windows", systemImage: "rectangle")
+                if showTabs {
+                    Label("\(tabCount) Tabs", systemImage: "square.stack")
+                }
+                Spacer()
+                Text("Last updated: \(Date(), style: .time)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 8)
         }
+        .frame(minWidth: 800, minHeight: 600)
     }
+    
+    private var windowCount: Int {
+        windowManager.windows.filter { $0.windowType == .window }.count
+    }
+    
+    private var tabCount: Int {
+        windowManager.windows.filter { $0.windowType == .tab }.count
+    }
+}
 
-    private var tableSection: some View {
+struct WindowListView: View {
+    let windows: [PaneKitWindow]
+    let showTabs: Bool
+    
+    var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 12) {
+            LazyVStack(alignment: .leading, spacing: 16) {
                 ForEach(groupedWindows, id: \.screenName) { group in
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("🖥 \(group.screenName)").font(.headline).padding(.bottom, 4)
-
-                        ForEach(group.windows, id: \.stableID) { win in
-                            windowRow(for: win)
-
-                            Divider()
-                        }
-                    }
-                    .padding(.bottom, 12)
+                    ScreenGroupView(
+                        screenName: group.screenName,
+                        windows: group.windows,
+                        showTabs: showTabs
+                    )
                 }
             }
-            .padding(.top, 4)
+            .padding()
         }
     }
     
     private var groupedWindows: [(screenName: String, windows: [PaneKitWindow])] {
-        let all = cacheModel.windows
-
-        let mainWindows = all.filter { $0.windowType == .window }
-
-        let tabsByHost: [String: [PaneKitWindow]] = Dictionary(
-            grouping: all.filter { $0.windowType == .tab },
-            by: { $0.pkWindow.parentTabHost }
+        // Nur Haupt-Fenster
+        let mainWindows = windows.filter { $0.windowType == .window }
+        
+        // Tabs nach Parent gruppieren
+        let tabsByParent: [String: [PaneKitWindow]] = Dictionary(
+            grouping: windows.filter { $0.windowType == .tab },
+            by: { $0.parentID ?? "" }
         )
-
-        let groups = Dictionary(grouping: mainWindows) { win in
+        
+        // Nach Screen gruppieren
+        let grouped = Dictionary(grouping: mainWindows) { win in
             win.screen?.localizedName ?? "Unknown Screen"
         }
-
-        let result: [(String, [PaneKitWindow])] = groups.map { (screenName, windows) in
-            let sortedWindows = windows.sorted {
+        
+        // Windows mit ihren Tabs verbinden
+        let result: [(String, [PaneKitWindow])] = grouped.map { (screenName, wins) in
+            let sortedWindows = wins.sorted {
                 $0.appName.localizedCaseInsensitiveCompare($1.appName) == .orderedAscending
             }
-
+            
+            // Tabs zu jedem Window hinzufügen
             let enriched: [PaneKitWindow] = sortedWindows.map { win in
                 let copy = win
-                copy.tabs = tabsByHost[win.stableID] ?? []
+                copy.tabs = tabsByParent[win.stableID] ?? []
                 return copy
             }
-
+            
             return (screenName, enriched)
         }
         
@@ -215,64 +198,192 @@ struct MainContentView: View {
             $0.0.localizedCaseInsensitiveCompare($1.0) == .orderedAscending
         }
     }
-    
-    private var allDisplayWindows: [PaneKitWindow] {
-        let mainWindows = cacheModel.windows.filter { $0.windowType != .tab }
+}
 
-        if showTabs {
-            return mainWindows
-        } else {
-            return mainWindows
-        }
-    }
+struct ScreenGroupView: View {
+    let screenName: String
+    let windows: [PaneKitWindow]
+    let showTabs: Bool
     
-    @ViewBuilder
-    private func windowRow(for win: PaneKitWindow) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Screen Header
             HStack {
-                Text(win.appName).font(.headline)
+                Image(systemName: "display")
+                Text(screenName)
+                    .font(.headline)
                 Spacer()
-                Text("PID: \(win.pid)").font(.caption).foregroundStyle(.secondary)
+                Text("\(windows.count) windows")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            HStack(spacing: 12) {
-                Text("🪟 \(win.title)")
-                Text(win.isVisible ? "👁 sichtbar" : "🚫 versteckt")
-                Text(win.isMinimized ? "💤 minimiert" : "🟢 aktiv")
-                if win.isFocused { Text("⭐ Fokus") }
-            }
-            .font(.caption).foregroundStyle(.secondary)
-
-            Text("📐 \(Int(win.frame.origin.x)), \(Int(win.frame.origin.y)) – \(Int(win.frame.size.width))×\(Int(win.frame.size.height))").font(.caption2).foregroundStyle(.gray)
-
-            if let tabs = win.tabs, !tabs.isEmpty {
-                VStack(alignment: .leading, spacing: 2) {
-                    ForEach(tabs, id: \.stableID) { tab in
-                        HStack {
-                            Text("↳ \(tab.title)").font(.caption2).foregroundStyle(.secondary)
-                            Spacer()
-                            if tab.isFocused {
-                                Image(systemName: "star.fill").font(.caption2)
-                            }
-                        }
+            .padding(.vertical, 4)
+            
+            // Windows
+            ForEach(windows, id: \.stableID) { window in
+                WindowRowView(window: window, showTabs: showTabs)
+                
+                if window.stableID != windows.last?.stableID {
+                    Divider()
                         .padding(.leading, 20)
-                    }
                 }
-                .padding(.top, 2)
             }
         }
-    }
-
-    private func refreshCache() async {
-        isLoading = true
-        defer { isLoading = false }
-
-        //await PaneKitCache.shared.refreshAllWindows()
-        print("🔄 Cache refreshed (triggered manually)")
-    }
-
-    private func clearCache() async {
-        //await PaneKitCache.shared.clear()
-        print("🧹 Cache cleared")
+        .padding()
+        .background(Color(.controlBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
-*/
+
+struct WindowRowView: View {
+    let window: PaneKitWindow
+    let showTabs: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // App Name & PID
+            HStack {
+                Text(window.appName)
+                    .font(.headline)
+                
+                if window.isFocused {
+                    Image(systemName: "star.fill")
+                        .font(.caption)
+                        .foregroundStyle(.yellow)
+                }
+                
+                Spacer()
+                
+                Text("PID: \(window.pid)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color(.quaternaryLabelColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+            }
+            
+            // Title & Status
+            HStack(spacing: 8) {
+                Image(systemName: "rectangle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                
+                Text(window.title)
+                    .font(.body)
+                    .lineLimit(1)
+                
+                Spacer()
+                
+                // Status Badges
+                HStack(spacing: 6) {
+                    if window.isVisible {
+                        StatusBadge(icon: "eye", color: .green)
+                    } else {
+                        StatusBadge(icon: "eye.slash", color: .gray)
+                    }
+                    
+                    if window.isMinimized {
+                        StatusBadge(icon: "minus.circle", color: .orange)
+                    }
+                    
+                    if window.isFullscreen {
+                        StatusBadge(icon: "arrow.up.left.and.arrow.down.right", color: .blue)
+                    }
+                }
+            }
+            
+            // Frame Info
+            HStack(spacing: 12) {
+                Label(
+                    "x:\(Int(window.frame.origin.x)) y:\(Int(window.frame.origin.y))",
+                    systemImage: "location"
+                )
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                
+                Label(
+                    "\(Int(window.frame.width))×\(Int(window.frame.height))",
+                    systemImage: "arrow.up.left.and.arrow.down.right"
+                )
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                
+                if window.zIndex >= 0 {
+                    Label("z:\(window.zIndex)", systemImage: "square.stack")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            
+            // Tabs
+            if showTabs, let tabs = window.tabs, !tabs.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Divider()
+                        .padding(.vertical, 4)
+                    
+                    ForEach(tabs, id: \.stableID) { tab in
+                        TabRowView(tab: tab)
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(Color(.controlBackgroundColor).opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+}
+
+struct TabRowView: View {
+    let tab: PaneKitWindow
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "arrow.turn.down.right")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            
+            Image(systemName: "square.on.square")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            
+            Text(tab.title)
+                .font(.caption)
+                .lineLimit(1)
+            
+            Spacer()
+            
+            if tab.isFocused {
+                Image(systemName: "star.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.yellow)
+            }
+        }
+        .padding(.leading, 24)
+        .padding(.vertical, 2)
+    }
+}
+
+struct StatusBadge: View {
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        Image(systemName: icon)
+            .font(.caption2)
+            .foregroundStyle(color)
+            .padding(4)
+            .background(color.opacity(0.15))
+            .clipShape(Circle())
+    }
+}
+
+// ✅ Notification Extension
+extension Notification.Name {
+    static let paneKitCacheDidUpdate = Notification.Name("PaneKitCacheDidUpdate")
+}
+
+#Preview {
+    ContentView()
+        .environmentObject(WindowManager())
+}

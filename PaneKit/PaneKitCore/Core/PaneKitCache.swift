@@ -10,12 +10,14 @@ final class PaneKitCache {
     
     func store(_ window: PaneKitWindow) {
         cache[window.stableID] = window
+        notifyUpdate()
     }
     
     func store(_ windows: [PaneKitWindow]) {
         for window in windows {
             cache[window.stableID] = window
         }
+        notifyUpdate()
     }
     
     func get(_ stableID: String) -> PaneKitWindow? {
@@ -32,14 +34,17 @@ final class PaneKitCache {
     
     func remove(_ stableID: String) {
         cache.removeValue(forKey: stableID)
+        notifyUpdate()
     }
     
     func removeAll(where predicate: (PaneKitWindow) -> Bool) {
         cache = cache.filter { !predicate($0.value) }
+        notifyUpdate()
     }
     
     func clear() {
         cache.removeAll()
+        notifyUpdate()
     }
     
     func contains(_ stableID: String) -> Bool {
@@ -48,6 +53,11 @@ final class PaneKitCache {
     
     func count() -> Int {
         cache.count
+    }
+    
+    // ✅ NEU: Notification senden bei Cache-Updates
+    private func notifyUpdate() {
+        NotificationCenter.default.post(name: .paneKitCacheDidUpdate, object: nil)
     }
     
     func debugDump() -> String {
@@ -63,4 +73,9 @@ final class PaneKitCache {
         }
         return output
     }
+}
+
+// ✅ Notification Name Extension
+extension Notification.Name {
+    static let paneKitCacheDidUpdate = Notification.Name("PaneKitCacheDidUpdate")
 }

@@ -76,16 +76,19 @@
 
 @interface _PaneKitWindowIDCache : NSObject
     @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSArray<NSDictionary *> *> *pidCache;
+    @property (nonatomic, strong) NSMutableDictionary<NSNumber *, NSDate *> *pidTimestamps; // ✅ NEU
     @property (nonatomic, strong) NSDate *lastUpdate;
     + (instancetype)shared;
     - (nullable NSArray<NSDictionary *> *)windowsForPID:(pid_t)pid;
     - (void)storeWindows:(NSArray<NSDictionary *> *)windows forPID:(pid_t)pid;
 @end
+
 @interface PKWindow ()
     @property (nonatomic, assign) CGWindowID _windowID;
     @property (nonatomic, assign) BOOL isActiveCache;
     @property (nonatomic, assign) BOOL isMinimizedCache;
     @property (nonatomic, assign) BOOL isFocusedCache;
+    + (NSArray *)getCachedWindowList; // ✅ NEU - Deklaration der neuen Methode
 @end
 
 @implementation _PaneKitWindowIDCache
@@ -96,20 +99,24 @@
     dispatch_once(&onceToken, ^{
         shared = [_PaneKitWindowIDCache new];
         shared.pidCache = [NSMutableDictionary dictionary];
+        shared.pidTimestamps = [NSMutableDictionary dictionary]; // ✅ NEU
         shared.lastUpdate = [NSDate distantPast];
     });
     return shared;
 }
 
 - (nullable NSArray<NSDictionary *> *)windowsForPID:(pid_t)pid {
-    if ([[NSDate date] timeIntervalSinceDate:self.lastUpdate] > 1.0)
+    NSDate *timestamp = self.pidTimestamps[@(pid)];
+    if (!timestamp || [[NSDate date] timeIntervalSinceDate:timestamp] > 5.0) {
         return nil;
+    }
     return self.pidCache[@(pid)];
 }
 
 - (void)storeWindows:(NSArray<NSDictionary *> *)windows forPID:(pid_t)pid {
     if (!windows) return;
     self.pidCache[@(pid)] = windows;
+    self.pidTimestamps[@(pid)] = [NSDate date]; // ✅ NEU
     self.lastUpdate = [NSDate date];
 }
 
@@ -152,6 +159,10 @@ static AXError _AXUIElementGetWindow(AXUIElementRef element, CGWindowID *idOut) 
     return _AXUIElementGetWindow_ptr(element, idOut);
 }
 
+static NSArray *_cachedGlobalWindowList = nil;
+static NSDate *_windowListTimestamp = nil;
+static const NSTimeInterval kWindowListCacheTTL = 2.0;
+
 @implementation PKWindow
 
 @synthesize pid = _pid;
@@ -165,6 +176,24 @@ static AXError _AXUIElementGetWindow(AXUIElementRef element, CGWindowID *idOut) 
     static dispatch_once_t once;
     dispatch_once(&once, ^{ map = [NSMutableDictionary new]; });
     return map;
+}
+
++ (NSArray *)getCachedWindowList {
+    @synchronized (self) {
+        // Cache noch gültig?
+        if (_cachedGlobalWindowList && _windowListTimestamp &&
+            [[NSDate date] timeIntervalSinceDate:_windowListTimestamp] < kWindowListCacheTTL) {
+            return _cachedGlobalWindowList;
+        }
+        
+        // Cache erneuern
+        _cachedGlobalWindowList = CFBridgingRelease(
+            CGWindowListCopyWindowInfo(kCGWindowListOptionAll, kCGNullWindowID)
+        );
+        _windowListTimestamp = [NSDate date];
+        
+        return _cachedGlobalWindowList;
+    }
 }
 
 - (instancetype)initWithAXUIElement:(AXUIElementRef)element {
@@ -226,7 +255,7 @@ static AXError _AXUIElementGetWindow(AXUIElementRef element, CGWindowID *idOut) 
         self.stableID = computeStableIdentifierForWindow(self.axElementRef, wid, pid, appName);
     }
     
-    NSArray *windowList = CFBridgingRelease(CGWindowListCopyWindowInfo(kCGWindowListOptionAll, kCGNullWindowID));
+    NSArray *windowList = [PKWindow getCachedWindowList];
     NSInteger index = NSNotFound;
     NSInteger currentIndex = 0;
 
@@ -1770,33 +1799,62 @@ NSPoint PKMidpoint(NSRect r) {
     return CGRectMake(pos.x, pos.y, size.width, size.height);
 }
 
+static NSArray<NSDictionary *> *_cachedZOrder = nil;
+static NSDate *_zOrderTimestamp = nil;
+static const NSTimeInterval kZOrderCacheTTL = 0.1; // 100ms Cache
+
 NSArray<NSDictionary *> *PKzOrderForScreen(CGRect screenFrame) {
-    CFArrayRef list = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID);
-    NSMutableArray *result = [NSMutableArray array];
+    @synchronized ([NSObject class]) {
+        // Cache noch gültig? (100ms)
+        if (_cachedZOrder && _zOrderTimestamp &&
+            [[NSDate date] timeIntervalSinceDate:_zOrderTimestamp] < kZOrderCacheTTL) {
+            // Filtere gecachte Ergebnisse für den gewünschten Screen
+            NSMutableArray *filtered = [NSMutableArray array];
+            for (NSDictionary *item in _cachedZOrder) {
+                NSString *frameStr = item[@"frame"];
+                if (frameStr) {
+                    CGRect rect = NSRectToCGRect(NSRectFromString(frameStr));
+                    if (CGRectIntersectsRect(rect, screenFrame)) {
+                        [filtered addObject:item];
+                    }
+                }
+            }
+            return filtered;
+        }
+        
+        // Cache erneuern
+        CFArrayRef list = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID);
+        NSMutableArray *result = [NSMutableArray array];
 
-    NSArray *windows = [[(__bridge NSArray *)list reverseObjectEnumerator] allObjects];
-    NSInteger z = 0;
-    for (NSDictionary *info in windows) {
-        NSDictionary *bounds = info[(NSString *)kCGWindowBounds];
-        if (!bounds) continue;
+        NSArray *windows = [[(__bridge NSArray *)list reverseObjectEnumerator] allObjects];
+        NSInteger z = 0;
+        for (NSDictionary *info in windows) {
+            NSDictionary *bounds = info[(NSString *)kCGWindowBounds];
+            if (!bounds) continue;
 
-        CGRect rect = CGRectMake([bounds[@"X"] doubleValue], [bounds[@"Y"] doubleValue], [bounds[@"Width"] doubleValue], [bounds[@"Height"] doubleValue]);
-        if (!CGRectIntersectsRect(rect, screenFrame)) continue;
+            CGRect rect = CGRectMake([bounds[@"X"] doubleValue], [bounds[@"Y"] doubleValue], [bounds[@"Width"] doubleValue], [bounds[@"Height"] doubleValue]);
+            if (!CGRectIntersectsRect(rect, screenFrame)) continue;
 
-        pid_t pid = [info[(NSString *)kCGWindowOwnerPID] intValue];
-        NSNumber *windowID = info[(NSString *)kCGWindowNumber];
-        if (!windowID) continue;
+            pid_t pid = [info[(NSString *)kCGWindowOwnerPID] intValue];
+            NSNumber *windowID = info[(NSString *)kCGWindowNumber];
+            if (!windowID) continue;
 
-        [result addObject:@{
-            @"pid": @(pid),
-            @"windowID": windowID,
-            @"zIndex": @(z++),
-            @"frame": NSStringFromRect(NSRectFromCGRect(rect))
-        }];
-    }
+            [result addObject:@{
+                @"pid": @(pid),
+                @"windowID": windowID,
+                @"zIndex": @(z++),
+                @"frame": NSStringFromRect(NSRectFromCGRect(rect))
+            }];
+        }
 
-    CFRelease(list);
-    return result;
+        CFRelease(list);
+        
+        // ✅ Cache speichern
+        _cachedZOrder = [result copy];
+        _zOrderTimestamp = [NSDate date];
+        
+        return result;
+    } // ✅ Ende synchronized block
 }
 
 @end

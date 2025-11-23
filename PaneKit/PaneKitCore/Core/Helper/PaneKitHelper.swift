@@ -183,6 +183,7 @@ public struct AXNotify: RawRepresentable, Hashable, @unchecked Sendable {
     public static let tabClosed = AXNotify(rawValue: "AXTabClosedNotification" as CFString)
     public static let tabSelected = AXNotify(rawValue: "AXTabSelectedNotification" as CFString)
     public static let focusedTabChanged = AXNotify(rawValue: "AXFocusedTabChangedNotification" as CFString)
+    public static let selectedTabChanged = AXNotify(rawValue: "AXSelectedTabChanged" as CFString)
     
     public static let applicationActivated = AXNotify(rawValue: kAXApplicationActivatedNotification as CFString)
     public static let applicationDeactivated = AXNotify(rawValue: kAXApplicationDeactivatedNotification as CFString)
