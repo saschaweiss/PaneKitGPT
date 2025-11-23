@@ -1,6 +1,7 @@
 import SwiftUI
 import PaneKitCore
- 
+import Combine
+
 @main
 struct PaneKitApp: App {
     @StateObject private var windowManager = WindowManager()
@@ -17,7 +18,7 @@ struct PaneKitApp: App {
                 .task {
                     await windowManager.initialize()
                 }
-        } 
+        }
     }
 }
 
