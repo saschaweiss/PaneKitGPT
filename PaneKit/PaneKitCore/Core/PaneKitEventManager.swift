@@ -3,8 +3,8 @@ import AppKit
 import ApplicationServices
 
 @MainActor
-final class PaneKitEventManager {
-    static let shared = PaneKitEventManager()
+public final class PaneKitEventManager {
+    public static let shared = PaneKitEventManager()
     
     private(set) var isRunning = false
     private var observers: [pid_t: AXObserver] = [:]
@@ -20,7 +20,7 @@ final class PaneKitEventManager {
     private let moveResizeDebounceInterval: TimeInterval = 0.05
     
     // ✅ NEU: Konfigurierbares Logging-System
-    enum LogLevel {
+    public enum LogLevel {
         case none       // Kein Logging (Produktion)
         case minimal    // Nur Emojis (Standard)
         case verbose    // Alle Details (Debug)
@@ -57,7 +57,7 @@ final class PaneKitEventManager {
     }
     
     // ✅ NEU: Logging-Level zur Laufzeit ändern
-    func setLogLevel(_ level: LogLevel) {
+    public func setLogLevel(_ level: LogLevel) {
         logLevel = level
     }
     
